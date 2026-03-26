@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# MuJoCo
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment
+.env
+
+# Research materials / local assets
+have/
