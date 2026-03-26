@@ -28,5 +28,8 @@ Thumbs.db
 # Environment
 .env
 
+# Generated documents
+*.pdf
+
 # Research materials / local assets
 have/
