@@ -30,6 +30,7 @@ Thumbs.db
 
 # Generated documents
 *.pdf
+*.docx
 
 # LaTeX build outputs
 *.aux

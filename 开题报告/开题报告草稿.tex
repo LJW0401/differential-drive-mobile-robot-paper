@@ -8,6 +8,8 @@
 \usepackage{hyperref}
 \usepackage{enumitem}
 \usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{fontspec}
 
 \hypersetup{
   colorlinks=true,
@@ -21,13 +23,47 @@
 \titleformat{\section}{\large\bfseries}{\thesection}{1em}{}
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{1em}{}
 
-\title{毕业设计开题报告草稿\\[0.5em]\large 差速驱动移动机器人的运动仿真与控制研究与实现}
-\author{学生：刘济伟\\学号：1120220518\\指导教师：郑建波}
-\date{\today}
+\newcommand{\makeproposalcover}{%
+\begin{titlepage}
+\thispagestyle{empty}
+
+\begin{center}
+    \vspace*{1cm}
+    \includegraphics[width=0.8\textwidth]{../have/基于Linux的简易差速驱动机器人运动仿真实现/Logo.png}
+\end{center}
+
+\vspace{2.2cm}
+\begin{center}
+    {\zihao{1}\heiti 毕业设计开题报告}
+\end{center}
+
+\vspace{1.5cm}
+\begin{center}
+    {\zihao{3} 差速驱动移动机器人的运动仿真与控制研究与实现}
+\end{center}
+
+\vspace{2.2cm}
+\begin{center}
+\renewcommand{\arraystretch}{2}
+\begin{tabular}{>{\heiti}p{3cm} >{\centering\arraybackslash}p{8cm}}
+    院\quad \quad 系： & 工程系 \\ \cline{2-2}
+    专\quad \quad 业： & 电子与计算机工程 \\ \cline{2-2}
+    班\quad \quad 级： & 三班 \\ \cline{2-2}
+    姓\quad \quad 名： & 刘济伟 \\ \cline{2-2}
+    学\quad \quad 号： & 1120220518 \\ \cline{2-2}
+    指导教师： & 郑建波 \\ \cline{2-2}
+    日\quad \quad 期： & 2026 年 3 月 26 日 \\ \cline{2-2}
+\end{tabular}
+\end{center}
+
+\vfill
+\end{titlepage}
+}
 
 \begin{document}
 
-\maketitle
+\makeproposalcover
+\setcounter{page}{1}
 
 \section{课题背景与研究意义}
 差速驱动移动机器人因结构简单、成本较低、控制实现相对直接，在室内物流、巡检、教学实验和移动平台研究中具有广泛应用。对于此类机器人而言，运动控制性能直接影响路径跟踪精度、姿态稳定性以及整机运行效率，因此围绕其运动仿真、控制算法设计和实物实现开展研究，具有较强的工程意义与应用价值。
