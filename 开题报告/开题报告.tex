@@ -1,0 +1,158 @@
+\documentclass[12pt,a4paper]{ctexart}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3.17cm,right=3.17cm]{geometry}
+\usepackage{setspace}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{fontspec}
+\usepackage{multirow}
+\usepackage{makecell}
+
+\newfontfamily\cyrfont{Noto Serif}
+\newcommand{\cyr}[1]{{\cyrfont #1}}
+
+\hypersetup{
+  colorlinks=false,
+  pdfborder={0 0 0}
+}
+
+\setstretch{1.25}
+\setlength{\parindent}{2em}
+\pagestyle{empty}
+
+\begin{document}
+
+% ==================== 标题部分 ====================
+\begin{center}
+    {\zihao{2} 深圳北理莫斯科大学毕业设计（论文）}
+
+    \vspace{0.3cm}
+    {\zihao{2} 开题报告}
+
+    \vspace{0.3cm}
+    {\zihao{4}\bfseries\cyr{Выпускной проект (дипломная работа) Университета МГУ-ППИ в Шэньчжэне - Доклад о постановке темы}}
+\end{center}
+
+\vspace{0.5cm}
+
+% ==================== 表格主体 ====================
+\renewcommand{\arraystretch}{1.6}
+\setlength{\tabcolsep}{4pt}
+
+\noindent
+\begin{longtable}{|p{3.6cm}|p{3.0cm}|p{3.6cm}|p{3.0cm}|}
+\hline
+{\zihao{-4} 学生姓名\newline\cyr{\zihao{5}ФИО студента}} &
+{\zihao{-4} 刘济伟} &
+{\zihao{-4} 学号\newline\cyr{\zihao{5}Номер сту. карты}} &
+{\zihao{-4} 1120220518} \\
+\hline
+{\zihao{-4} 专业\newline\cyr{\zihao{5}Специальность}} &
+{\zihao{-4} 电子与计算机工程} &
+{\zihao{-4} 年级\newline\cyr{\zihao{5}курс}} &
+{\zihao{-4} 2022级} \\
+\hline
+{\zihao{-4} 题目\newline\cyr{\zihao{5}Тема ВКР}} &
+\multicolumn{3}{p{9.9cm}|}{\zihao{-4} 差速驱动移动机器人的运动仿真与控制研究与实现} \\
+\hline
+{\zihao{-4} 导师姓名\newline\cyr{\zihao{5}ФИО научного}\newline\cyr{\zihao{5}руководителя}} &
+{\zihao{-4} 郑建波} &
+{\zihao{-4} 职\;\;称\newline\cyr{\zihao{5}Должность}} &
+{\zihao{-4} 讲师级研究员} \\
+\hline
+
+% ==================== 选题意义、研究现状及可行性分析 ====================
+\multicolumn{4}{|p{13.8cm}|}{
+\vspace{0.3cm}
+{\zihao{-4}
+
+\textbf{选题意义}
+
+差速驱动移动机器人因结构简单、成本较低、机动性较强，在室内物流、巡检、教学实验及智能移动平台研究中具有广泛应用。但在现有开发实践中，相关工作往往存在两个突出不足：一是建模、仿真、控制与实验评测相互割裂，很多仿真工作停留在"模型能跑起来、算法能演示"的层面，缺少从建模到控制验证再到结果评测的完整闭环；二是不同控制方法缺少统一的控制接口与指标体系，导致 PID、LQR、MPC 等方法常常在不同模型、不同参数和不同实验条件下分别验证，结论难以横向比较，也难以为后续实物部署提供直接依据。
+
+因此，本课题拟围绕差速驱动移动机器人构建"建模——仿真——控制——评测——迁移"的完整研究链路。通过在 MuJoCo 平台上完成机器人模型构建、运动仿真环境搭建、控制算法部署、指标化实验评测，并进一步面向实物平台考虑参数整定与方法迁移，可形成一套兼顾研究性与工程性的统一验证流程。这一工作不仅能够避免课题停留在简单仿真演示层面，而且能够回答"如何在统一平台上比较不同控制方法""如何让仿真结果更好服务于实物控制实现"等更具研究价值的问题。
+
+\textbf{研究现状}
+
+目前，差速驱动移动机器人研究主要集中在运动学/动力学建模、路径跟踪、轨迹规划和控制算法设计等方面，MuJoCo、Gazebo、Webots 等工具也已被广泛用于仿真验证。PID 控制具有实现简单、工程应用成熟的特点，适合作为基线方法；LQR 在状态反馈与控制代价权衡方面具有优势；MPC 则能够显式处理模型约束和多变量优化问题。然而，现有工作总体上更关注单一算法的实现或某一局部性能的改善，而对于统一控制接口、统一评价指标以及仿真结果向实物系统迁移的系统化研究仍相对不足，这也正是本课题的切入点。
+
+\textbf{可行性分析}
+
+课题前期已完成"基于 Linux 的简易差速驱动机器人运动仿真实现"相关研究，具备差速机器人基础建模、MuJoCo 仿真与控制调试经验；同时，当前正在制作差速机器人，并具备 Jetson Orin Nano 等计算资源，为后续算法部署与迁移验证提供了软硬件条件。在实施路径上，本课题将以统一仿真闭环、统一控制接口和统一指标评测为核心，先完成保底的基线控制与指标化验证，再逐步扩展到 LQR、MPC 及初步迁移测试，任务边界明确，整体具有较强可行性。
+}
+\vspace{0.3cm}
+} \\
+\hline
+
+% ==================== 论文框架 ====================
+\multicolumn{4}{|p{13.8cm}|}{
+\vspace{0.3cm}
+{\zihao{-4}
+
+1. 绪论：介绍课题背景、研究意义、国内外研究现状，并从当前差速机器人研究中"验证链路不完整""控制方法缺少统一比较框架"等问题切入，明确本文的研究目标。
+
+2. 差速驱动移动机器人建模：分析机器人运动学与动力学特性，建立仿真与控制所需模型，为后续算法部署与迁移提供统一对象。
+
+3. 仿真平台设计与实现：基于 MuJoCo 构建差速驱动移动机器人的运动仿真环境，打通"建模——仿真——控制——评测——迁移"链路中的仿真与接口部分。
+
+4. 统一控制接口与指标体系设计：面向 PID、LQR、MPC 等控制方法，设计统一的输入输出接口、测试任务与评价指标，使不同算法能够在同一平台和同一标准下进行部署与比较。
+
+5. 控制算法设计、实现与评测：完成 PID、LQR、MPC 三类控制方法的建模、求解、部署与实验验证，并围绕轨迹跟踪精度、响应速度、稳定性、超调量和约束处理能力等指标开展对比分析。
+
+6. 仿真结果分析与迁移验证：总结不同控制方法在统一指标体系下的表现，分析仿真与实物之间的差异来源，并探索参数整定和控制策略向实物平台迁移的可行路径。
+
+7. 总结与展望：总结本文工作、主要结论及不足，并对后续实物控制优化与平台扩展方向进行展望。
+}
+\vspace{0.3cm}
+} \\
+\hline
+
+% ==================== 主要参考文献 ====================
+\multicolumn{4}{|p{13.8cm}|}{
+\vspace{0.3cm}
+{\zihao{-4}
+
+{[1]} DeSantis, R. M. Modeling and path-tracking control of a mobile wheeled robot with a differential drive. \textit{Robotica}, 1995, 13(4): 401--410. DOI: 10.1017/S026357470001883X.
+
+{[2]} Alves, T. G., Lages, W. F., Henriques, R. V. Parametric Identification and Controller Design for a Differential-Drive Mobile Robot. \textit{IFAC-PapersOnLine}, 2018, 51(15): 437--442. DOI: 10.1016/j.ifacol.2018.09.184.
+
+{[3]} Cornejo, J., Magallanes, J., Denegri, E., Canahuire, R. Trajectory Tracking Control of a Differential Wheeled Mobile Robot: A Polar Coordinates Control and LQR Comparison. \textit{Proceedings of the 2018 IEEE 25th International Conference on Electronics, Electrical Engineering and Computing (INTERCON)}, 2018. DOI: 10.1109/INTERCON.2018.8526366.
+
+{[4]} Bouzoualegh, S., Guechi, E.-H., Kelaiaia, R. Model Predictive Control of a Differential-Drive Mobile Robot. \textit{Acta Universitatis Sapientiae, Electrical and Mechanical Engineering}, 2018, 10(1): 20--41. DOI: 10.2478/auseme-2018-0002.
+
+{[5]} Todorov, E., Erez, T., Tassa, Y. MuJoCo: A Physics Engine for Model-Based Control. \textit{2012 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)}, 2012: 5026--5033. DOI: 10.1109/IROS.2012.6386109.
+
+{[6]} Kumar, A., Tyagi, B., Gupta, H. O. Modelling and Trajectory Tracking of Wheeled Mobile Robots. \textit{Procedia Technology}, 2016, 24: 538--545. DOI: 10.1016/j.protcy.2016.05.094.
+}
+\vspace{0.3cm}
+} \\
+\hline
+
+% ==================== 写作进度安排 ====================
+\multicolumn{4}{|p{13.8cm}|}{
+\vspace{0.3cm}
+{\zihao{-4}
+
+1. 2026-03-25 至 2026-03-27：明确课题方案，完成开题报告与总体技术路线设计。
+
+2. 2026-03-28 至 2026-04-05：完成差速驱动移动机器人模型构建与 MuJoCo 仿真环境搭建。
+
+3. 2026-04-06 至 2026-04-20：完成 PID、LQR、MPC 控制算法的建模、实现与仿真部署。
+
+4. 2026-04 下旬：完成中期检查材料，展示仿真平台、控制算法效果及阶段性分析结果。
+
+5. 2026-05-01 至 2026-05-15：完成实物控制实现及多组实验对比分析。
+
+6. 2026-05 中下旬至 2026-06 上旬：完成论文撰写、修改、答辩材料整理与演示准备。
+}
+\vspace{0.3cm}
+} \\
+\hline
+
+\end{longtable}
+
+\end{document}
