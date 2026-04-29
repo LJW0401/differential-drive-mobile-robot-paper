@@ -1,3 +1,6 @@
 [submodule "five_link_ctrl_simulation"]
 	path = five_link_ctrl_simulation
 	url = https://github.com/LJW0401/five_link_ctrl_simulation.git
+[submodule "web_control"]
+	path = web_control
+	url = https://github.com/LJW0401/web_control.git
