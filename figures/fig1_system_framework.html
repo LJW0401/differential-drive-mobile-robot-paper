@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<title>图 1 · 五连杆轮腿机器人系统总体框架图</title>
+<style>
+  :root{
+    --bg:#f6f7fb;
+    --ink:#1c2230;
+    --ink-2:#5b6577;
+    --line:#cdd3df;
+    --m1:#3b6cf6;
+    --m2:#0aa572;
+    --m3:#e0731c;
+    --m4:#8b5cf6;
+    --m5:#d63a8c;
+    --card:#ffffff;
+    --soft:#eef1f8;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Source Han Sans SC","Noto Sans CJK SC","PingFang SC","Microsoft YaHei",
+                -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;font-feature-settings:"palt";}
+  .page{max-width:1240px;margin:32px auto;padding:24px 28px 36px;background:#fff;
+        border-radius:14px;box-shadow:0 6px 28px rgba(20,30,60,.06);}
+  .caption{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .caption .tag{font-size:12px;letter-spacing:.18em;color:var(--ink-2);
+                background:var(--soft);padding:4px 10px;border-radius:999px}
+  .caption h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.02em}
+  .sub{color:var(--ink-2);font-size:13px;margin:4px 0 18px}
+
+  .frame{position:relative;padding:22px 26px 24px;border:1px dashed #d6dbe7;border-radius:14px;background:
+         radial-gradient(1200px 600px at 50% -10%, #eef3ff 0%, transparent 60%),
+         linear-gradient(180deg,#fbfcff 0%, #f7f9fd 100%);}
+
+  .module{position:relative;background:var(--card);border:1px solid var(--line);
+          border-radius:14px;padding:14px 16px 16px;
+          box-shadow:0 1px 0 #fff inset, 0 8px 22px -14px rgba(20,30,60,.16);}
+  .module h3{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:10px}
+  .module h3 .num{display:inline-flex;align-items:center;justify-content:center;
+       width:24px;height:24px;border-radius:7px;color:#fff;font-size:12px;font-weight:700}
+  .module .tagline{font-size:11.5px;color:var(--ink-2);margin:-2px 0 10px;padding-left:34px}
+
+  .m1 h3 .num{background:var(--m1)} .m1{border-top:3px solid var(--m1)}
+  .m2 h3 .num{background:var(--m2)} .m2{border-top:3px solid var(--m2)}
+  .m3 h3 .num{background:var(--m3)} .m3{border-top:3px solid var(--m3)}
+  .m4 h3 .num{background:var(--m4)} .m4{border-top:3px solid var(--m4)}
+  .m5 h3 .num{background:var(--m5)} .m5{border-top:3px solid var(--m5)}
+
+  .row{display:grid;gap:18px}
+  .r1{grid-template-columns:1fr;margin-bottom:84px}
+  .r2{grid-template-columns:1.1fr 1fr 1fr;gap:54px;margin-bottom:84px}
+  .r3{grid-template-columns:1fr;margin-bottom:78px}
+  .r4{grid-template-columns:1fr}
+
+  .grid{display:grid;gap:8px}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g4{grid-template-columns:repeat(4,1fr)}
+
+  .chip{background:var(--soft);border:1px solid #e3e7f1;border-radius:9px;
+        padding:8px 10px;font-size:12px;line-height:1.45}
+  .chip .k{color:var(--ink-2);font-size:10.5px;letter-spacing:.06em;
+           text-transform:uppercase;display:block;margin-bottom:1px}
+  .chip b{font-weight:600}
+
+  .pills{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
+  .pill{position:relative;background:linear-gradient(180deg,#fff,#fbfbfd);
+        border:1px solid var(--line);border-radius:10px;padding:9px 8px 8px;text-align:center}
+  .pill b{display:block;font-size:14px;letter-spacing:.04em}
+  .pill span{font-size:10.5px;color:var(--ink-2);line-height:1.35}
+  .pill.pid{box-shadow:inset 0 -3px 0 #f0a040}
+  .pill.lqr{box-shadow:inset 0 -3px 0 #4ec27a}
+  .pill.mpc{box-shadow:inset 0 -3px 0 #6f8cff}
+
+  .iface{margin-top:8px;padding:8px 10px;border-radius:8px;
+         background:#0f1729;color:#dbe3ff;font-family:"JetBrains Mono",ui-monospace,Menlo,monospace;
+         font-size:11.5px;letter-spacing:.02em;line-height:1.55}
+  .iface .c{color:#7aa2ff} .iface .s{color:#7ee2b8} .iface .m{color:#8a93ad}
+
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12px;color:var(--ink-2)}
+  .legend i{display:inline-block;width:22px;height:0;border-top:2px solid #1c2230;
+            margin-right:6px;vertical-align:middle}
+  .legend i.dash{border-top-style:dashed}
+  .legend i.green{border-top-color:#0aa572}
+  .legend i.purple{border-top-color:#d63a8c}
+
+  svg.flow{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .flow .lbl{font-size:11px;fill:#3b4456;font-weight:500;paint-order:stroke;stroke:#fff;stroke-width:3}
+  .flow .lbl-em{font-size:11px;fill:#0aa572;font-weight:700;letter-spacing:.06em;paint-order:stroke;stroke:#fff;stroke-width:3}
+  .flow .lbl-p{fill:#d63a8c}
+
+  .rail{position:absolute;top:18px;bottom:18px;width:24px;display:flex;align-items:center;
+        justify-content:center;font-size:11px;color:#7a8295;letter-spacing:.16em;writing-mode:vertical-rl}
+  .rail.l{left:-2px} .rail.r{right:-2px}
+
+  @media print{ body{background:#fff} .page{box-shadow:none;margin:0;max-width:none} }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="caption">
+    <span class="tag">FIGURE&nbsp;1</span>
+    <h1>五连杆轮腿机器人系统总体框架图</h1>
+  </div>
+  <div class="sub">机构建模 → MuJoCo 仿真 → 多算法平衡控制 ｜ 统一六维状态接口 · 三类控制器即插即用</div>
+
+  <div class="frame" id="frame">
+    <div class="rail l">机&nbsp;构&nbsp;建&nbsp;模 &nbsp;·&nbsp; 仿&nbsp;真&nbsp;验&nbsp;证 &nbsp;·&nbsp; 多&nbsp;算&nbsp;法&nbsp;对&nbsp;比</div>
+    <div class="rail r">VMC&nbsp;解&nbsp;耦 &nbsp;·&nbsp; 倒&nbsp;立&nbsp;摆&nbsp;控&nbsp;制 &nbsp;·&nbsp; yaw&nbsp;差&nbsp;分</div>
+
+    <!-- ===== Layer 1: 建模 ===== -->
+    <div class="row r1">
+      <div class="module m1" id="mod1">
+        <h3><span class="num">1</span>机构与动力学建模模块</h3>
+        <div class="tagline">五连杆并联机构 + VMC + 车身倒立摆，三层数学基础</div>
+        <div class="grid g3">
+          <div class="chip" id="mod1-kin"><span class="k">5-bar Kinematics</span>
+            <b>五连杆运动学 / 雅可比</b><br>
+            (φ₁, φ₄) ⇄ (L₀, φ₀)， l₁=l₄=0.21 m, l₂=l₃=0.24 m
+          </div>
+          <div class="chip" id="mod1-vmc"><span class="k">VMC Mapping</span>
+            <b>虚拟模型控制</b><br>
+            (F₀, T_p) → (τ₁, τ₄) 经雅可比 J(φ)
+          </div>
+          <div class="chip" id="mod1-dyn"><span class="k">Inverted Pendulum</span>
+            <b>车身倒立摆动力学（6 维）</b><br>
+            ẋ = f(x, u; L₀)，x ∈ ℝ⁶，u ∈ ℝ²
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Layer 2: 仿真 + 平衡控制 + 辅助通道 ===== -->
+    <div class="row r2">
+      <div class="module m2" id="mod2">
+        <h3><span class="num">2</span>MuJoCo 仿真平台模块</h3>
+        <div class="tagline">原版 MJCF · 三档周期 · 可观测易扩展</div>
+        <div class="grid">
+          <div class="chip"><span class="k">Model Layer</span>
+            <b>MJCF (env.xml + robot.xml)</b><br>
+            机体 8.4 kg + 双五连杆腿 + 双驱动轮（R = 0.088 m）
+          </div>
+          <div class="chip"><span class="k">Physics Layer</span>
+            <b>MuJoCo 内核</b>　<span style="color:#5b6577">Δt_sim = 1 ms</span>
+          </div>
+          <div class="chip" id="mod2-io"><span class="k">Sensors / Actuators</span>
+            <b>IMU + 4 关节编码器 + 2 轮编码器</b><br>
+            执行器 ctrlrange ±20 N·m（关节）／ ±4 N·m（轮）
+          </div>
+          <div class="chip"><span class="k">Multi-Rate Loop</span>
+            <b>Sense 1 ms · Control 4 ms · Print 20 ms</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="module m3" id="mod3">
+        <h3><span class="num">3</span>平衡控制算法模块</h3>
+        <div class="tagline">三类控制器共享 6 维状态 / 2 维输入接口</div>
+        <div class="pills" id="mod3-pills">
+          <div class="pill pid"><b>PID</b><span>关节 + pitch + 位移 + yaw 四级联</span></div>
+          <div class="pill lqr"><b>LQR</b><span>K(L₀) 离线打表 + 线性插值</span></div>
+          <div class="pill mpc"><b>MPC</b><span>condensed QP + PGD warm-start，N = 15</span></div>
+        </div>
+        <div class="iface" id="mod3-iface">
+          <span class="m"># 统一接口（左右腿各跑一路）</span><br>
+          x = (θ, θ̇, x, ẋ, φ, φ̇)<sup>T</sup> ∈ ℝ⁶<br>
+          u = (T, T_p)<sup>T</sup> ∈ ℝ²<br>
+          <span class="c">def</span> <span class="s">compute</span>(imu, motors)<br>
+          &nbsp;&nbsp;<span class="c">→</span> (joint_torque[4], wheel_torque[2])
+        </div>
+      </div>
+
+      <div class="module m4" id="mod4">
+        <h3><span class="num">4</span>辅助通道（三控制器共享）</h3>
+        <div class="tagline">腿长 PID + yaw PID + VMC 雅可比</div>
+        <div class="grid">
+          <div class="chip"><span class="k">Leg-length PID + g feedforward</span>
+            <b>F₀ = K_p (L₀<sup>d</sup>−L₀) + … + Mg cosθ / 2</b>
+          </div>
+          <div class="chip"><span class="k">Yaw PID</span>
+            <b>T_yaw = K_p e_yaw + K_d ė_yaw</b><br>
+            叠加到左右轮力矩差分
+          </div>
+          <div class="chip"><span class="k">VMC Jacobian</span>
+            <b>(F₀, T_p) → (τ₁, τ₄)</b><br>
+            经 (4.3)–(4.5) 雅可比映射
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Layer 3: 双腿并行执行 ===== -->
+    <div class="row r3">
+      <div class="module m3" id="mod3plus">
+        <h3><span class="num">3+</span>双腿独立平衡控制（左右各跑一路）</h3>
+        <div class="tagline">每条腿独立反馈一组 (T, T_p)；两路 T 取平均后叠 yaw 差分</div>
+        <div class="grid g4">
+          <div class="chip"><span class="k">Right Leg</span>
+            <b>x<sup>R</sup> = (θ<sup>R</sup>, θ̇<sup>R</sup>, x, ẋ, φ, φ̇)</b><br>
+            → (T<sup>R</sup>, T_p<sup>R</sup>)
+          </div>
+          <div class="chip"><span class="k">Left Leg</span>
+            <b>x<sup>L</sup> = (θ<sup>L</sup>, θ̇<sup>L</sup>, x, ẋ, φ, φ̇)</b><br>
+            → (T<sup>L</sup>, T_p<sup>L</sup>)
+          </div>
+          <div class="chip"><span class="k">Wheel Torque Mix</span>
+            <b>T<sub>r</sub>, T<sub>l</sub> = (T<sup>R</sup>+T<sup>L</sup>)/2 ± T_yaw</b>
+          </div>
+          <div class="chip"><span class="k">Joint Torque</span>
+            <b>(τ₁, τ₄)<sup>R/L</sup> = J(φ)·(F₀, T_p)<sup>R/L</sup></b>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Layer 4: 外部交互 ===== -->
+    <div class="row r4">
+      <div class="module m5" id="mod5">
+        <h3><span class="num">5</span>外部交互与监控模块</h3>
+        <div class="tagline">UDP 指令注入 · 键盘热切 · 状态打印；与控制器代码解耦</div>
+        <div class="grid g3">
+          <div class="chip"><span class="k">UDP Server (port 9000)</span>
+            <b>注入目标</b><br>
+            v_target / yaw_target / L0_target / pitch_target
+          </div>
+          <div class="chip"><span class="k">Keyboard</span>
+            <b>运行时人工干预</b><br>
+            通过 pynput 切工况
+          </div>
+          <div class="chip"><span class="k">State Logger</span>
+            <b>状态估计器导出</b><br>
+            供后处理绘制响应曲线
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <svg id="flow" class="flow" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <marker id="ar-k"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1c2230"/></marker>
+        <marker id="ar-g"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0aa572"/></marker>
+        <marker id="ar-p"   viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#d63a8c"/></marker>
+      </defs>
+    </svg>
+  </div>
+
+  <div class="legend">
+    <span><i></i>数据 / 控制流</span>
+    <span><i class="green"></i>闭环仿真（state ↔ torque）</span>
+    <span><i class="purple dash"></i>外部交互（指令注入）</span>
+    <span style="margin-left:auto">© 五连杆轮腿平衡机器人的运动仿真与控制研究与实现</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.getElementById('flow');
+  const frame = document.getElementById('frame');
+  const defs = svg.querySelector('defs');
+
+  // ---- arrow specification ----
+  // each arrow: {fromId, fromSide, toId, toSide, label, color, dashed, labelPos}
+  // fromSide / toSide: 'top'|'bottom'|'left'|'right' optionally with -NN (percent along edge)
+  // color: 'k' (black) | 'g' (green closed-loop) | 'p' (pink external)
+  const ARROWS = [
+    // ① 建模 ↓ 三个目标（落到下方 r2 三列上沿）
+    {from:['mod1-kin','bottom'],  to:['mod2','top-50'],     label:'MJCF · 物理参数',         color:'k', labelOff:[0, -8]},
+    {from:['mod1-vmc','bottom'],  to:['mod3','top-50'],     label:'A(L₀), B(L₀), K(L₀)',     color:'k', labelOff:[0, -8]},
+    {from:['mod1-dyn','bottom'],  to:['mod4','top-50'],     label:'J(φ) 雅可比',             color:'k', labelOff:[0, -8]},
+
+    // 闭环：sim ↔ control 双线平行（上行：state x；下行：control u）
+    {from:['mod2','right-30'],    to:['mod3','left-30'],    label:'state x',                  color:'g', labelOff:[0, -10]},
+    {from:['mod3','left-75'],     to:['mod2','right-75'],   label:'control u',                color:'g', labelOff:[0, 16]},
+
+    // control → aux （沿 iface 上方水平过去，避免与 iface 文本重叠）
+    {from:['mod3','right-30'],    to:['mod4','left-30'],    label:'T_p / yaw',                color:'k', labelOff:[0, -10]},
+
+    // control → 双腿
+    {from:['mod3','bottom'],      to:['mod3plus','top-50'], label:'两腿独立求解',             color:'k', labelOff:[16, 0]},
+
+    // 外部交互 → control（经双腿上行）
+    {from:['mod5','top'],         to:['mod3plus','bottom'], label:'UDP / 键盘指令',           color:'p', dashed:true, labelOff:[16, 0]},
+  ];
+
+  function side(rect, spec) {
+    let s = spec, pct = 50;
+    const i = spec.indexOf('-');
+    if (i > 0) { s = spec.slice(0, i); pct = parseFloat(spec.slice(i+1)); }
+    const p = pct / 100;
+    if (s === 'top')    return [rect.left + rect.width * p, rect.top];
+    if (s === 'bottom') return [rect.left + rect.width * p, rect.bottom];
+    if (s === 'left')   return [rect.left, rect.top + rect.height * p];
+    if (s === 'right')  return [rect.right, rect.top + rect.height * p];
+    return [rect.left + rect.width/2, rect.top + rect.height/2];
+  }
+
+  function pt(id, sideSpec, fr) {
+    const el = document.getElementById(id);
+    if (!el) return [0,0];
+    const r = el.getBoundingClientRect();
+    const local = {
+      left:   r.left   - fr.left,
+      right:  r.right  - fr.left,
+      top:    r.top    - fr.top,
+      bottom: r.bottom - fr.top,
+      width:  r.width,
+      height: r.height,
+    };
+    return side(local, sideSpec);
+  }
+
+  function tangent(sSide, len) {
+    const s = sSide.split('-')[0];
+    if (s === 'top')    return [0, -len];
+    if (s === 'bottom') return [0,  len];
+    if (s === 'left')   return [-len, 0];
+    if (s === 'right')  return [ len, 0];
+    return [0, 0];
+  }
+
+  function draw() {
+    const fr = frame.getBoundingClientRect();
+    svg.setAttribute('viewBox', `0 0 ${fr.width} ${fr.height}`);
+    svg.setAttribute('width', fr.width);
+    svg.setAttribute('height', fr.height);
+
+    // clear previous arrows but keep defs
+    Array.from(svg.children).forEach(n => { if (n !== defs) svg.removeChild(n); });
+
+    for (const a of ARROWS) {
+      const [sx, sy] = pt(a.from[0], a.from[1], fr);
+      const [tx, ty] = pt(a.to[0],   a.to[1],   fr);
+      const dist = Math.hypot(tx - sx, ty - sy);
+      const len = Math.min(80, Math.max(40, dist * 0.35));
+      const [tsx, tsy] = tangent(a.from[1], len);
+      const [ttx, tty] = tangent(a.to[1],   len);
+      const c1 = [sx + tsx, sy + tsy];
+      const c2 = [tx + ttx, ty + tty];
+      const path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', `M ${sx} ${sy} C ${c1[0]} ${c1[1]}, ${c2[0]} ${c2[1]}, ${tx} ${ty}`);
+      path.setAttribute('fill', 'none');
+      const stroke = a.color === 'g' ? '#0aa572' : a.color === 'p' ? '#d63a8c' : '#1c2230';
+      path.setAttribute('stroke', stroke);
+      path.setAttribute('stroke-width', a.color === 'g' ? '2' : '1.6');
+      if (a.dashed) path.setAttribute('stroke-dasharray', '6 4');
+      const marker = a.color === 'g' ? 'url(#ar-g)' : a.color === 'p' ? 'url(#ar-p)' : 'url(#ar-k)';
+      path.setAttribute('marker-end', marker);
+      svg.appendChild(path);
+
+      if (a.label) {
+        // approximate midpoint of cubic bezier
+        const mx = 0.125*sx + 0.375*c1[0] + 0.375*c2[0] + 0.125*tx;
+        const my = 0.125*sy + 0.375*c1[1] + 0.375*c2[1] + 0.125*ty;
+        const off = a.labelOff || [0, -6];
+        const text = document.createElementNS(NS, 'text');
+        text.setAttribute('x', mx + off[0]);
+        text.setAttribute('y', my + off[1]);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('class', a.color === 'g' ? 'lbl-em' : (a.color === 'p' ? 'lbl lbl-p' : 'lbl'));
+        text.textContent = a.label;
+        svg.appendChild(text);
+      }
+    }
+  }
+
+  function redraw() { draw(); }
+
+  if (document.readyState === 'complete') redraw();
+  else window.addEventListener('load', redraw);
+  window.addEventListener('resize', redraw);
+  // 字体加载完成会改变盒子尺寸，再重画一次
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(redraw);
+  }
+  // 防御：观察 frame 尺寸变化
+  if (window.ResizeObserver) {
+    new ResizeObserver(redraw).observe(frame);
+  }
+})();
+</script>
+</body>
+</html>
