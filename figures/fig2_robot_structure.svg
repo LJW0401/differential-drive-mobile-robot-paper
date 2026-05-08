@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560"
+     font-family="'Times New Roman','SimSun','Songti SC',serif" font-size="12" fill="#000">
+  <style>
+    .lbl    { font-size: 12px; fill: #000; }
+    .small  { font-size: 10.5px; fill: #333; }
+    .mono   { font-family: 'Consolas','Courier New',monospace; font-size: 11px; }
+    .ital   { font-style: italic; }
+    .mid    { text-anchor: middle; }
+    .end    { text-anchor: end; }
+    .lblbg  { paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+    .pnl    { fill: none; stroke: #000; stroke-width: 1; }
+    .body   { fill: #f4f4f4; stroke: #000; stroke-width: 1.2; }
+    .leg    { fill: none; stroke: #000; stroke-width: 2; }
+    .legdash{ fill: none; stroke: #000; stroke-width: 1; stroke-dasharray: 5 3; }
+    .meas   { fill: none; stroke: #000; stroke-width: 0.9; stroke-dasharray: 3 3; }
+    .ground { stroke: #000; stroke-width: 1.2; }
+    .joint  { fill: #fff; stroke: #000; stroke-width: 1.4; }
+    .jointF { fill: #000; stroke: #000; stroke-width: 1.2; }
+  </style>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+    <marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+    <pattern id="hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#000" stroke-width="0.6"/>
+    </pattern>
+  </defs>
+
+  <!-- 背景：纯白底，避免嵌入到深色主题或带透明背景的容器时露底 -->
+  <rect x="0" y="0" width="920" height="560" fill="#ffffff"/>
+
+  <!-- ============================================== -->
+  <!-- 左：侧视图 (Side View)                          -->
+  <!-- ============================================== -->
+  <g transform="translate(0,0)">
+    <text class="lbl mid" x="290" y="20" font-weight="bold">(a) 单腿侧视图（A=E 因 l₅=0 重合）</text>
+
+    <!-- panel border -->
+    <!-- (no panel border for cleaner thesis style) -->
+
+    <!-- 地面 -->
+    <line class="ground" x1="40" y1="490" x2="540" y2="490"/>
+    <rect x="40" y="490" width="500" height="10" fill="url(#hatch)"/>
+
+    <!-- 世界系 -->
+    <g transform="translate(60,520)">
+      <line x1="0" y1="0" x2="32" y2="0" stroke="#000" stroke-width="1" marker-end="url(#ars)"/>
+      <line x1="0" y1="0" x2="0" y2="-32" stroke="#000" stroke-width="1" marker-end="url(#ars)"/>
+      <text class="ital" x="36" y="4">x</text>
+      <text class="ital" x="-4" y="-36">z</text>
+      <text class="small" x="-2" y="14">world</text>
+    </g>
+
+    <!-- 机体 -->
+    <rect class="body" x="200" y="100" width="200" height="100" rx="2"/>
+    <text class="lbl" x="210" y="120" font-weight="bold">Body 机体</text>
+    <text class="small" x="210" y="138">M = 8.4 kg</text>
+    <text class="small" x="210" y="154">I_M = 0.112 kg·m²</text>
+    <text class="small" x="210" y="170">l = 0.03 m  (CoM↔髋轴)</text>
+
+    <!-- IMU -->
+    <rect x="345" y="110" width="46" height="20" fill="#fff" stroke="#000" stroke-width="0.9"/>
+    <text class="small mid" x="368" y="124">IMU</text>
+
+    <!-- CoM 点 -->
+    <circle cx="300" cy="150" r="3.5" fill="#000"/>
+    <text class="small" x="306" y="148">CoM</text>
+
+    <!-- 车身倾角 φ -->
+    <line x1="300" y1="100" x2="300" y2="60" stroke="#000" stroke-width="0.9" stroke-dasharray="3 2"/>
+    <line x1="300" y1="100" x2="328" y2="68" stroke="#000" stroke-width="1.2" marker-end="url(#ars)"/>
+    <path class="meas" d="M 300 80 A 20 20 0 0 1 314 73" stroke-dasharray="0"/>
+    <text class="ital" x="320" y="82">φ</text>
+    <text class="small" x="335" y="82">车身倾角</text>
+
+    <!-- 髋部 A=E (l5=0) -->
+    <circle class="joint" cx="300" cy="200" r="8"/>
+    <circle class="jointF" cx="300" cy="200" r="3.5"/>
+    <text class="lbl end" x="290" y="200">A=E</text>
+    <text class="small end" x="290" y="214">(l₅=0)</text>
+
+    <!-- 五连杆几何（按真实尺度）：
+         A=(300,200), L0=160 px (=0.20 m at 800 px/m)
+         C=(300,360)
+         l1=l4=168 px, l2=l3=192 px
+         B=(459,253), D=(141,253) -->
+    <line class="leg" x1="300" y1="200" x2="459" y2="253"/>
+    <line class="leg" x1="459" y1="253" x2="300" y2="360"/>
+    <line class="leg" x1="300" y1="200" x2="141" y2="253"/>
+    <line class="leg" x1="141" y1="253" x2="300" y2="360"/>
+
+    <!-- 关节圆点 -->
+    <circle class="joint" cx="459" cy="253" r="5"/>
+    <circle class="joint" cx="141" cy="253" r="5"/>
+    <circle class="jointF" cx="300" cy="360" r="5"/>
+
+    <!-- B / D / C 字标 -->
+    <text class="lbl" x="468" y="252">B</text>
+    <text class="small" x="468" y="266">前关节</text>
+    <text class="lbl end" x="132" y="252">D</text>
+    <text class="small end" x="132" y="266">后关节</text>
+    <text class="lbl" x="310" y="358">C</text>
+    <text class="small" x="310" y="374">足端</text>
+
+    <!-- 连杆长度标注 -->
+    <text class="small mid" x="382" y="222">l₁ = 0.21 m</text>
+    <text class="small mid" x="386" y="312">l₂ = 0.24 m</text>
+    <text class="small mid" x="220" y="222">l₄ = 0.21 m</text>
+    <text class="small mid" x="217" y="312">l₃ = 0.24 m</text>
+
+    <!-- 驱动关节 φ1 / φ4 -->
+    <text class="small ital" x="320" y="195">φ₁</text>
+    <text class="small ital end" x="282" y="195">φ₄</text>
+
+    <!-- 虚拟腿 L₀ 与 φ₀ -->
+    <line class="legdash" x1="300" y1="200" x2="300" y2="360"/>
+    <text class="ital lblbg" x="306" y="285">L₀</text>
+    <text class="small lblbg" x="320" y="285">虚拟腿长</text>
+
+    <line x1="300" y1="200" x2="370" y2="200" stroke="#000" stroke-width="0.7" stroke-dasharray="2 2"/>
+    <path class="meas" d="M 330 200 A 30 30 0 0 1 320 213" stroke-dasharray="0"/>
+    <text class="ital" x="335" y="220">φ₀</text>
+
+    <!-- θ 摆杆角公式 -->
+    <text class="small" x="335" y="245">θ = π/2 + φ − φ₀</text>
+
+    <!-- 驱动轮 -->
+    <circle cx="300" cy="410" r="50" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <circle cx="300" cy="410" r="4" fill="#000"/>
+    <line x1="300" y1="360" x2="300" y2="460" stroke="#000" stroke-width="0.7"/>
+    <line x1="250" y1="410" x2="350" y2="410" stroke="#000" stroke-width="0.7"/>
+    <line x1="265" y1="375" x2="335" y2="445" stroke="#000" stroke-width="0.6"/>
+    <line x1="335" y1="375" x2="265" y2="445" stroke="#000" stroke-width="0.6"/>
+
+    <!-- 半径 R 标注 -->
+    <line x1="300" y1="410" x2="345" y2="389" stroke="#000" stroke-width="0.9" marker-end="url(#ars)"/>
+    <text class="ital" x="352" y="386">R</text>
+    <text class="small" x="364" y="386">= 0.088 m</text>
+
+    <!-- T 力矩 -->
+    <path class="meas" d="M 405 410 A 60 60 0 0 1 400 440" stroke-dasharray="0" marker-end="url(#ars)"/>
+    <text class="ital" x="420" y="438">T</text>
+    <text class="small" x="430" y="438">轮力矩</text>
+
+    <!-- T_p 髋部虚拟力矩 -->
+    <path class="meas" d="M 275 195 A 35 35 0 0 0 275 225" stroke-dasharray="0" marker-end="url(#ars)"/>
+    <text class="ital" x="246" y="195">Tₚ</text>
+    <text class="small end" x="246" y="208">髋部虚拟力矩</text>
+
+    <!-- body_x 距离 -->
+    <line x1="60" y1="490" x2="300" y2="490" stroke="#000" stroke-width="0.7" stroke-dasharray="3 2"/>
+    <line x1="300" y1="490" x2="300" y2="460" stroke="#000" stroke-width="0.7" stroke-dasharray="3 2"/>
+    <text class="small mid lblbg" x="180" y="486">body_x</text>
+
+    <!-- 接地点 -->
+    <circle cx="300" cy="490" r="2.5" fill="#000"/>
+  </g>
+
+  <!-- ============================================== -->
+  <!-- 右：前视图 (Front View)                         -->
+  <!-- ============================================== -->
+  <g transform="translate(580,40)">
+    <text class="lbl mid" x="170" y="-20" font-weight="bold">(b) 前视图（双腿对称）</text>
+
+    <!-- ground -->
+    <line class="ground" x1="0" y1="430" x2="340" y2="430"/>
+    <rect x="0" y="430" width="340" height="10" fill="url(#hatch)"/>
+
+    <!-- body -->
+    <rect class="body" x="60" y="60" width="220" height="90"/>
+    <text class="lbl mid" x="170" y="92" font-weight="bold">Body 机体</text>
+    <text class="small mid" x="170" y="110">M = 8.4 kg</text>
+    <text class="small mid" x="170" y="126">I_M = 0.112 kg·m²</text>
+
+    <!-- 髋轴 -->
+    <line x1="80" y1="150" x2="260" y2="150" stroke="#000" stroke-width="0.9" stroke-dasharray="4 3"/>
+    <text class="small mid" x="170" y="164">髋轴 (hip axis)</text>
+
+    <!-- 右腿 (图中右侧) -->
+    <circle class="jointF" cx="240" cy="150" r="5"/>
+    <line class="leg" x1="240" y1="150" x2="240" y2="290"/>
+    <circle class="jointF" cx="240" cy="290" r="5"/>
+    <circle cx="240" cy="335" r="42" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <line x1="240" y1="290" x2="240" y2="380" stroke="#000" stroke-width="0.6"/>
+    <line x1="200" y1="335" x2="280" y2="335" stroke="#000" stroke-width="0.6"/>
+    <text class="small mid" x="240" y="245">右腿 L₀</text>
+    <text class="ital" x="280" y="338">T_r</text>
+
+    <!-- 左腿 (图中左侧) -->
+    <circle class="jointF" cx="100" cy="150" r="5"/>
+    <line class="leg" x1="100" y1="150" x2="100" y2="290"/>
+    <circle class="jointF" cx="100" cy="290" r="5"/>
+    <circle cx="100" cy="335" r="42" fill="#fff" stroke="#000" stroke-width="1.6"/>
+    <line x1="100" y1="290" x2="100" y2="380" stroke="#000" stroke-width="0.6"/>
+    <line x1="60" y1="335" x2="140" y2="335" stroke="#000" stroke-width="0.6"/>
+    <text class="small mid" x="100" y="245">左腿 L₀</text>
+    <text class="ital end" x="60" y="338">T_l</text>
+
+    <!-- 轨距 -->
+    <line x1="100" y1="395" x2="240" y2="395" stroke="#000" stroke-width="0.9" marker-end="url(#ars)" marker-start="url(#ars)"/>
+    <text class="small mid" x="170" y="411">轨距 ≈ 0.36 m</text>
+
+    <!-- yaw 差分注释 -->
+    <text class="small mid" x="170" y="455">yaw 控制：T_r − T_l = 2 · T_yaw  （yaw PID）</text>
+  </g>
+
+  <!-- 底部脚注：参数表见正文 §4.1 表 1 -->
+  <text class="small mid" x="460" y="552" fill="#555">物理参数取值见正文 §4.1 表 1（与代码 calc_lqr_k.py · DEFAULT_ROBOT_PARAMS 一致）</text>
+</svg>

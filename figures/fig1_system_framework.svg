@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 760"
+     font-family="'Times New Roman','SimSun','Songti SC',serif" font-size="13" fill="#000">
+  <style>
+    .box      { fill: #fff; stroke: #000; stroke-width: 1.2; }
+    .boxhdr   { fill: #f0f0f0; stroke: #000; stroke-width: 1.2; }
+    .sub      { fill: #fafafa; stroke: #888; stroke-width: 0.8; }
+    .num      { font-weight: bold; font-size: 13px; }
+    .ttl      { font-weight: bold; font-size: 13.5px; }
+    .small    { font-size: 11.5px; fill: #333; }
+    .mono     { font-family: 'Consolas','Courier New',monospace; font-size: 11.5px; }
+    .mid      { text-anchor: middle; }
+    .arr      { fill: none; stroke: #000; stroke-width: 1.1; }
+    .lblbg    { paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+  </style>
+
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <!-- 背景：纯白底，避免嵌入到深色主题或带透明背景的容器时露底 -->
+  <rect x="0" y="0" width="920" height="760" fill="#ffffff"/>
+
+  <!-- ===== ① 建模模块 ===== -->
+  <g transform="translate(40,30)">
+    <rect class="box" x="0" y="0" width="840" height="110"/>
+    <rect class="boxhdr" x="0" y="0" width="840" height="22"/>
+    <text class="num" x="10" y="16">①</text>
+    <text class="ttl" x="28" y="16">机构与动力学建模模块</text>
+    <text class="small" x="200" y="16">五连杆并联机构 + VMC + 车身倒立摆，三层数学基础</text>
+
+    <rect class="sub" x="14" y="34" width="262" height="62"/>
+    <text class="small" x="20" y="50">5-bar Kinematics · 五连杆运动学 / 雅可比</text>
+    <text class="mono" x="20" y="68">(φ₁, φ₄)  ⇄  (L₀, φ₀)</text>
+    <text class="small" x="20" y="86">l₁ = l₄ = 0.21 m,  l₂ = l₃ = 0.24 m,  l₅ = 0</text>
+
+    <rect class="sub" x="289" y="34" width="262" height="62"/>
+    <text class="small" x="295" y="50">VMC Mapping · 虚拟模型控制</text>
+    <text class="mono" x="295" y="68">(F₀, Tₚ)  →  (τ₁, τ₄)</text>
+    <text class="small" x="295" y="86">经雅可比 J(φ) 映射回关节力矩</text>
+
+    <rect class="sub" x="564" y="34" width="262" height="62"/>
+    <text class="small" x="570" y="50">Inverted Pendulum · 倒立摆动力学（6 维）</text>
+    <text class="mono" x="570" y="68">ẋ = f(x, u; L₀)</text>
+    <text class="mono" x="570" y="86">x ∈ ℝ⁶,  u ∈ ℝ²</text>
+  </g>
+
+  <!-- ===== 三条下行箭头 (建模 → sim / control / aux) ===== -->
+  <g class="arr" stroke-width="1.1">
+    <path d="M 180 140 V 230" marker-end="url(#ar)"/>
+    <path d="M 460 140 V 230" marker-end="url(#ar)"/>
+    <path d="M 740 140 V 230" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="180" y="186">MJCF·物理参数</text>
+  <text class="small lblbg mid" x="460" y="186">A(L₀), B(L₀), K(L₀)</text>
+  <text class="small lblbg mid" x="740" y="186">J(φ) 雅可比</text>
+
+  <!-- ===== ② / ③ / ④ 三列 ===== -->
+  <!-- ② 仿真 -->
+  <g transform="translate(40,230)">
+    <rect class="box" x="0" y="0" width="280" height="200"/>
+    <rect class="boxhdr" x="0" y="0" width="280" height="22"/>
+    <text class="num" x="10" y="16">②</text>
+    <text class="ttl" x="28" y="16">MuJoCo 仿真平台模块</text>
+
+    <rect class="sub" x="12" y="34" width="256" height="34"/>
+    <text class="small" x="18" y="48">Model Layer</text>
+    <text class="small" x="18" y="62">MJCF (env.xml + robot.xml)</text>
+
+    <rect class="sub" x="12" y="74" width="256" height="34"/>
+    <text class="small" x="18" y="88">Physics Layer</text>
+    <text class="small" x="18" y="102">MuJoCo 内核    Δt_sim = 1 ms</text>
+
+    <rect class="sub" x="12" y="114" width="256" height="36"/>
+    <text class="small" x="18" y="128">Sensors / Actuators</text>
+    <text class="small" x="18" y="142">IMU + 4 关节编码器 + 2 轮编码器</text>
+
+    <rect class="sub" x="12" y="156" width="256" height="34"/>
+    <text class="small" x="18" y="170">Multi-Rate Loop</text>
+    <text class="small" x="18" y="184">Sense 1 ms · Control 4 ms · Print 20 ms</text>
+  </g>
+
+  <!-- ③ 平衡控制 -->
+  <g transform="translate(340,230)">
+    <rect class="box" x="0" y="0" width="280" height="200"/>
+    <rect class="boxhdr" x="0" y="0" width="280" height="22"/>
+    <text class="num" x="10" y="16">③</text>
+    <text class="ttl" x="28" y="16">平衡控制算法模块</text>
+
+    <rect class="sub" x="12" y="32" width="80" height="56"/>
+    <text class="small mid ttl" x="52" y="50" font-size="12">PID</text>
+    <text class="small mid" x="52" y="65" font-size="10">关节+pitch</text>
+    <text class="small mid" x="52" y="78" font-size="10">+位移+yaw</text>
+
+    <rect class="sub" x="100" y="32" width="80" height="56"/>
+    <text class="small mid ttl" x="140" y="50" font-size="12">LQR</text>
+    <text class="small mid" x="140" y="65" font-size="10">K(L₀) 离线表</text>
+    <text class="small mid" x="140" y="78" font-size="10">+ 线性插值</text>
+
+    <rect class="sub" x="188" y="32" width="80" height="56"/>
+    <text class="small mid ttl" x="228" y="50" font-size="12">MPC</text>
+    <text class="small mid" x="228" y="63" font-size="10">condensed QP</text>
+    <text class="small mid" x="228" y="76" font-size="10">PGD warm-start</text>
+    <text class="small mid" x="228" y="89" font-size="10">N = 15</text>
+
+    <rect class="sub" x="12" y="98" width="256" height="92" stroke="#444"/>
+    <text class="small" x="18" y="113">统一接口（左右腿各跑一路）：</text>
+    <text class="mono" x="18" y="132">x = (θ, θ̇, x, ẋ, φ, φ̇)ᵀ ∈ ℝ⁶</text>
+    <text class="mono" x="18" y="150">u = (T, Tₚ)ᵀ ∈ ℝ²</text>
+    <text class="mono" x="18" y="168">compute(imu, motors)</text>
+    <text class="mono" x="32" y="183">→ (joint_torque[4], wheel_torque[2])</text>
+  </g>
+
+  <!-- ④ 辅助通道 -->
+  <g transform="translate(640,230)">
+    <rect class="box" x="0" y="0" width="240" height="200"/>
+    <rect class="boxhdr" x="0" y="0" width="240" height="22"/>
+    <text class="num" x="10" y="16">④</text>
+    <text class="ttl" x="28" y="16">辅助通道（共享）</text>
+
+    <rect class="sub" x="12" y="34" width="216" height="46"/>
+    <text class="small" x="18" y="48">Leg-length PID + g feedforward</text>
+    <text class="mono" x="18" y="65" font-size="10.5">F₀ = K_p (L₀ᵈ−L₀) + … + Mg cosθ/2</text>
+
+    <rect class="sub" x="12" y="86" width="216" height="46"/>
+    <text class="small" x="18" y="100">Yaw PID（左右轮差分）</text>
+    <text class="mono" x="18" y="117" font-size="10.5">T_yaw = K_p e_yaw + K_d ė_yaw</text>
+
+    <rect class="sub" x="12" y="138" width="216" height="50"/>
+    <text class="small" x="18" y="152">VMC Jacobian</text>
+    <text class="mono" x="18" y="170" font-size="10.5">(F₀, Tₚ)  →  (τ₁, τ₄)</text>
+    <text class="small" x="18" y="184" font-size="10.5">经式 (4.3)–(4.5) 雅可比</text>
+  </g>
+
+  <!-- 闭环 sim ↔ control，平行水平双线 -->
+  <g class="arr">
+    <path d="M 320 270 H 340" marker-end="url(#ar)"/>
+    <path d="M 340 390 H 320" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="330" y="262">state x</text>
+  <text class="small lblbg mid" x="330" y="406">control u</text>
+
+  <!-- control → aux -->
+  <g class="arr">
+    <path d="M 620 270 H 640" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="630" y="262">Tₚ</text>
+
+  <!-- ===== ③+ 双腿独立控制 ===== -->
+  <g transform="translate(40,490)">
+    <rect class="box" x="0" y="0" width="840" height="100"/>
+    <rect class="boxhdr" x="0" y="0" width="840" height="22"/>
+    <text class="num" x="10" y="16">③⁺</text>
+    <text class="ttl" x="38" y="16">双腿独立平衡控制（左右各跑一路）</text>
+    <text class="small" x="290" y="16">每条腿独立反馈一组 (T, Tₚ)；两路 T 取平均后叠 yaw 差分</text>
+
+    <rect class="sub" x="14" y="34" width="200" height="54"/>
+    <text class="small" x="20" y="50">Right Leg</text>
+    <text class="mono" x="20" y="67" font-size="10.5">xᴿ=(θᴿ,θ̇ᴿ,x,ẋ,φ,φ̇)</text>
+    <text class="mono" x="20" y="82" font-size="10.5">→ (Tᴿ, Tₚᴿ)</text>
+
+    <rect class="sub" x="226" y="34" width="200" height="54"/>
+    <text class="small" x="232" y="50">Left Leg</text>
+    <text class="mono" x="232" y="67" font-size="10.5">xᴸ=(θᴸ,θ̇ᴸ,x,ẋ,φ,φ̇)</text>
+    <text class="mono" x="232" y="82" font-size="10.5">→ (Tᴸ, Tₚᴸ)</text>
+
+    <rect class="sub" x="438" y="34" width="200" height="54"/>
+    <text class="small" x="444" y="50">Wheel Torque Mix</text>
+    <text class="mono" x="444" y="67" font-size="10.5">T_r,T_l = (Tᴿ+Tᴸ)/2 ± T_yaw</text>
+
+    <rect class="sub" x="650" y="34" width="176" height="54"/>
+    <text class="small" x="656" y="50">Joint Torque</text>
+    <text class="mono" x="656" y="67" font-size="10.5">(τ₁,τ₄) = J(φ)·(F₀,Tₚ)</text>
+  </g>
+
+  <!-- control → 双腿 -->
+  <g class="arr">
+    <path d="M 480 430 V 490" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="480" y="465">两腿独立求解</text>
+
+  <!-- 双腿 → 仿真（torque 回馈，斜上） -->
+  <g class="arr" stroke-dasharray="0">
+    <path d="M 220 490 C 220 460, 200 460, 180 430" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="155" y="465">τ + 轮力矩</text>
+
+  <!-- ===== ⑤ 外部交互 ===== -->
+  <g transform="translate(40,650)">
+    <rect class="box" x="0" y="0" width="840" height="80"/>
+    <rect class="boxhdr" x="0" y="0" width="840" height="22"/>
+    <text class="num" x="10" y="16">⑤</text>
+    <text class="ttl" x="28" y="16">外部交互与监控模块</text>
+    <text class="small" x="220" y="16">UDP 指令注入 · 键盘热切 · 状态打印；与控制器代码解耦</text>
+
+    <rect class="sub" x="14" y="34" width="270" height="38"/>
+    <text class="small" x="20" y="50">UDP Server (port 9000)</text>
+    <text class="mono" x="20" y="65" font-size="10.5">v_target / yaw_target / L0_target</text>
+
+    <rect class="sub" x="296" y="34" width="240" height="38"/>
+    <text class="small" x="302" y="50">Keyboard</text>
+    <text class="mono" x="302" y="65" font-size="10.5">pynput · 运行时人工干预</text>
+
+    <rect class="sub" x="548" y="34" width="278" height="38"/>
+    <text class="small" x="554" y="50">State Logger</text>
+    <text class="mono" x="554" y="65" font-size="10.5">状态估计器导出，供后处理绘图</text>
+  </g>
+
+  <!-- 外部 → 双腿 -->
+  <g class="arr" stroke-dasharray="5 3">
+    <path d="M 460 650 V 590" marker-end="url(#ar)"/>
+  </g>
+  <text class="small lblbg mid" x="460" y="624">UDP / 键盘指令</text>
+</svg>
