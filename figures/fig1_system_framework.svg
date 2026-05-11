@@ -107,7 +107,7 @@
 
     <rect class="sub" x="12" y="98" width="256" height="92" stroke="#444"/>
     <text class="small" x="18" y="113">统一接口（左右腿各跑一路）：</text>
-    <text class="mono" x="18" y="132">x = (θ, θ̇, x, ẋ, φ, φ̇)ᵀ ∈ ℝ⁶</text>
+    <text class="mono" x="18" y="132">x = (θ, θ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>, x, ẋ, φ, φ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>)ᵀ ∈ ℝ⁶</text>
     <text class="mono" x="18" y="150">u = (T, Tₚ)ᵀ ∈ ℝ²</text>
     <text class="mono" x="18" y="168">compute(imu, motors)</text>
     <text class="mono" x="32" y="183">→ (joint_torque[4], wheel_torque[2])</text>
@@ -158,12 +158,12 @@
 
     <rect class="sub" x="14" y="34" width="200" height="54"/>
     <text class="small" x="20" y="50">Right Leg</text>
-    <text class="mono" x="20" y="67" font-size="10.5">xᴿ=(θᴿ,θ̇ᴿ,x,ẋ,φ,φ̇)</text>
+    <text class="mono" x="20" y="67" font-size="10.5">xᴿ=(θᴿ,θ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>ᴿ,x,ẋ,φ,φ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>)</text>
     <text class="mono" x="20" y="82" font-size="10.5">→ (Tᴿ, Tₚᴿ)</text>
 
     <rect class="sub" x="226" y="34" width="200" height="54"/>
     <text class="small" x="232" y="50">Left Leg</text>
-    <text class="mono" x="232" y="67" font-size="10.5">xᴸ=(θᴸ,θ̇ᴸ,x,ẋ,φ,φ̇)</text>
+    <text class="mono" x="232" y="67" font-size="10.5">xᴸ=(θᴸ,θ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>ᴸ,x,ẋ,φ,φ<tspan dx="-5.5" dy="-6" font-size="140%">·</tspan><tspan dy="6"></tspan>)</text>
     <text class="mono" x="232" y="82" font-size="10.5">→ (Tᴸ, Tₚᴸ)</text>
 
     <rect class="sub" x="438" y="34" width="200" height="54"/>
