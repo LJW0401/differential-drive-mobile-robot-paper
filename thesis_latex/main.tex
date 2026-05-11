@@ -257,7 +257,7 @@ MuJoCo（Multi-Joint dynamics with Contact）由 Todorov 等人提出\cite{Todor
 \section{机构与动力学建模模块设计}
 \russiansectiontitle{Модуль моделирования механизма и динамики}
 
-机构与动力学建模模块是整个系统的数学基础，其功能定位是：以统一的状态变量、控制输入和动力学描述，为仿真平台搭建与控制器设计提供共同的数学模型。该模块包含三个子组件：\textbf{五连杆运动学与雅可比}、\textbf{虚拟模型控制（VMC）映射}和\textbf{车身倒立摆动力学}。五连杆运动学子组件负责将两个驱动关节角 $(\varphi_1, \varphi_4)$ 映射为虚拟腿长 $L_0$ 与虚拟腿极角 $\varphi_0$，并提供对应的雅可比矩阵；VMC 映射子组件利用雅可比将上层期望的虚拟腿端力 $F_0$（控制腿长）与髋部虚拟力矩 $T_p$（控制车身倾角）变换为关节力矩 $(\tau_1, \tau_4)$；车身倒立摆动力学子组件则在 VMC 之上，将整车抽象为以驱动轮为底、车身为倒立摆、虚拟腿为可变长摆杆的六自由度刚体系统，建立从控制输入到状态导数的非线性微分方程。
+机构与动力学建模模块是整个系统的数学基础，其功能定位是：以统一的状态变量、控制输入和动力学描述，为仿真平台搭建与控制器设计提供共同的数学模型。GBC486 机器人的整体机械结构与坐标系定义见\cref{fig:robot}。该模块包含三个子组件：\textbf{五连杆运动学与雅可比}、\textbf{虚拟模型控制（VMC）映射}和\textbf{车身倒立摆动力学}。五连杆运动学子组件负责将两个驱动关节角 $(\varphi_1, \varphi_4)$ 映射为虚拟腿长 $L_0$ 与虚拟腿极角 $\varphi_0$，并提供对应的雅可比矩阵；VMC 映射子组件利用雅可比将上层期望的虚拟腿端力 $F_0$（控制腿长）与髋部虚拟力矩 $T_p$（控制车身倾角）变换为关节力矩 $(\tau_1, \tau_4)$；车身倒立摆动力学子组件则在 VMC 之上，将整车抽象为以驱动轮为底、车身为倒立摆、虚拟腿为可变长摆杆的六自由度刚体系统，建立从控制输入到状态导数的非线性微分方程。
 
 \begin{figure}[H]
   \centering
@@ -294,7 +294,7 @@ MuJoCo（Multi-Joint dynamics with Contact）由 Todorov 等人提出\cite{Todor
 \section{控制算法模块设计}
 \russiansectiontitle{Модуль алгоритма управления}
 
-控制算法模块是本研究的核心，其功能定位是为五连杆轮腿机器人提供 PID、LQR 与 MPC 三类典型平衡控制策略，并通过统一的输入--输出接口接入仿真平台。所有控制器共享同一组六维状态量 $(\theta, \dot\theta, x, \dot x, \varphi, \dot\varphi)$ 和同一组二维平衡控制量 $(T, T_p)$，并对外提供形式一致的 \texttt{compute(imu, motors)} $\to$ \texttt{(joint\_torque, wheel\_torque)} 接口。所有控制器内部都包含一致的辅助通道：\textbf{腿长 PID + 重力前馈}生成 $F_0$ 用于控制腿长，\textbf{yaw PID} 在轮力矩上叠加差分用于跟踪 yaw，\textbf{VMC 雅可比}将 $(F_0, T_p)$ 变换为关节力矩。差异仅集中在如何生成核心平衡量 $(T, T_p)$ 上。
+控制算法模块是本研究的核心，其功能定位是为五连杆轮腿机器人提供 PID、LQR 与 MPC 三类典型平衡控制策略，并通过统一的输入--输出接口接入仿真平台。三类控制器的统一接口与共享辅助通道结构见\cref{fig:ctrlif}：所有控制器共享同一组六维状态量 $(\theta, \dot\theta, x, \dot x, \varphi, \dot\varphi)$ 和同一组二维平衡控制量 $(T, T_p)$，并对外提供形式一致的 \texttt{compute(imu, motors)} $\to$ \texttt{(joint\_torque, wheel\_torque)} 接口。所有控制器内部都包含一致的辅助通道：\textbf{腿长 PID + 重力前馈}生成 $F_0$ 用于控制腿长，\textbf{yaw PID} 在轮力矩上叠加差分用于跟踪 yaw，\textbf{VMC 雅可比}将 $(F_0, T_p)$ 变换为关节力矩。差异仅集中在如何生成核心平衡量 $(T, T_p)$ 上。
 
 \begin{figure}[H]
   \centering
@@ -389,7 +389,37 @@ J_{22} = \frac{l_4 \cos(\varphi_0 - \varphi_2)\sin(\varphi_3 - \varphi_4)}{L_0 \
 \mathbf{M}(\mathbf{x}, L_0)\begin{bmatrix} \ddot\theta \\ \ddot x \\ \ddot\varphi \end{bmatrix}
 = \mathbf{h}(\mathbf{x}, T, T_p, L_0)
 \end{equation}
-其中惯量矩阵 $\mathbf{M}(\cdot)$ 与右端项 $\mathbf{h}(\cdot)$ 由轮平动、车身平动、车身转动以及虚拟摆杆转动四类拉格朗日方程整理而得（具体表达式较长，其符号与本研究使用的实现 \texttt{calc\_lqr\_k.py} 中 \texttt{dynamics(...)} 函数完全一致）。式~\eqref{eq:dyn-mass} 等价于一个非线性状态空间方程：
+其中惯量矩阵 $\mathbf{M}(\cdot)$ 与右端项 $\mathbf{h}(\cdot)$ 由轮平动、车身平动、车身转动以及虚拟摆杆转动四类拉格朗日方程整理而得。为使后续 LQR/MPC 设计可追溯，下面给出其展开形式（取 $L = L_M = L_0/2$，并定义有效质量系数 $\xi := M + m_p/2$、轮等效转动惯量 $I_w = m_w R^2$、虚拟摆杆等效转动惯量 $I_p = m_p\,(L_0^2 + 0.05^2)/12$）。惯量矩阵的三行三列依次对应「轮平动 / 摆杆转动 / 车身 pitch」三个方程：
+\begin{equation}
+\label{eq:M-mat}
+\mathbf{M}(\mathbf{x}, L_0) =
+\begin{bmatrix}
+R\,\xi\,L_0\,\cos\theta            & R(M + m_p + 2 m_w)        & -R\,M\,l\,\cos\varphi \\[2pt]
+I_p + L_0^2\,(M + m_p/4)            & -\tfrac{L_0}{2}(2M+m_p)\cos\theta & M\,l\,L_0\,\cos(\theta-\varphi) \\[2pt]
+M\,L_0\,l\,\cos(\theta+\varphi)     & M\,l\,\cos\varphi          & I_M + M\,l^2
+\end{bmatrix}
+\end{equation}
+矩阵的非对角元体现了三类耦合：第一行的 $\cos\theta$ 项耦合摆杆姿态与轮平动；第二行的 $\cos(\theta-\varphi)$ 项耦合摆杆与车身倾角；第三行的 $\cos(\theta+\varphi)$ 项体现了车身倾角对摆杆产生的反向耦合。右端项 $\mathbf{h}(\cdot)$ 由控制输入、重力项与离心/科氏项三部分组成，引入两组辅助记号：
+\begin{align}
+\label{eq:dyn-aux-P}
+P_\mathrm{eq}   &= (M+m_p)\,g - \xi L_0\,\dot\theta^2\cos\theta - M l\,\dot\varphi^2\cos\varphi,\\
+\label{eq:dyn-aux-PM}
+P_\mathrm{eq,M} &= M\,g - M L_0\,\dot\theta^2\cos\theta - M l\,\dot\varphi^2\cos\varphi,\\
+\label{eq:dyn-aux-N}
+N_\mathrm{eq}   &= -\xi L_0\,\dot\theta^2\sin\theta + M l\,\dot\varphi^2\sin\varphi,\quad
+N_\mathrm{eq,M} = -M L_0\,\dot\theta^2\sin\theta + M l\,\dot\varphi^2\sin\varphi.
+\end{align}
+则
+\begin{equation}
+\label{eq:h-vec}
+\mathbf{h}(\mathbf{x}, T, T_p, L_0) =
+\begin{bmatrix}
+T + R\bigl(\xi L_0\,\dot\theta^2 \sin\theta - M l\,\dot\varphi^2 \sin\varphi\bigr) \\[2pt]
+\tfrac{L_0}{2}\,(P_\mathrm{eq} + P_\mathrm{eq,M})\,\sin\theta - \tfrac{L_0}{2}\,(N_\mathrm{eq} + N_\mathrm{eq,M})\,\cos\theta - T + T_p \\[2pt]
+T_p + N_\mathrm{eq,M}\,l\,\cos\varphi + P_\mathrm{eq,M}\,l\,\sin\varphi
+\end{bmatrix}
+\end{equation}
+式~\eqref{eq:M-mat}--\eqref{eq:h-vec} 在数值上与本研究使用的 \texttt{calc\_lqr\_k.py} 中 \texttt{dynamics(\ldots)} 函数（变量名 \texttt{c\_*\_dd*} 对应 $\mathbf{M}$ 各分量、\texttt{rhs\_*} 对应 $\mathbf{h}$ 各分量、\texttt{P\_base/PM\_base/N\_nl/NM\_nl} 对应辅助量~\eqref{eq:dyn-aux-P}--\eqref{eq:dyn-aux-N}）完全一致；式~\eqref{eq:dyn-mass} 等价于一个非线性状态空间方程：
 \begin{equation}
 \label{eq:dyn-ss}
 \dot{\mathbf{x}} = f(\mathbf{x}, \mathbf{u}; L_0)
@@ -436,7 +466,7 @@ B(L_0) = \left.\frac{\partial f}{\partial \mathbf{u}}\right|_{0}
 \subsection{多档周期主循环}
 \russiansubsectiontitle{Главный цикл с многоуровневой периодичностью}
 
-仿真主循环（\texttt{Simulation.py}）按整数倍关系协同推进四类子任务：物理仿真步进 \texttt{mj\_step}（每次循环执行）、传感器读取（每 1\,ms 一次）、控制计算（每 4\,ms 一次）、监控/键盘（每 20\,ms 一次）。控制周期之所以取 4\,ms（250\,Hz）而非更高频率，是为了与实物常用的电机驱动周期一致，便于后续迁移；监控周期取 20\,ms 则避免标准输出对主循环造成阻塞。
+仿真主循环（\texttt{Simulation.py}）按整数倍关系协同推进四类子任务：物理仿真步进 \texttt{mj\_step}（每次循环执行）、传感器读取（每 1\,ms 一次）、控制计算（每 4\,ms 一次）、监控/键盘（每 20\,ms 一次）。控制周期之所以取 4\,ms（250\,Hz）而非更高频率，是为了与实物常用的电机驱动周期一致，便于后续迁移；监控周期取 20\,ms 则避免标准输出对主循环造成阻塞。仿真平台运行时的可视化界面与控制台输出见\cref{fig:mjsim}。
 
 \begin{table}[H]
 \centering
@@ -467,7 +497,7 @@ B(L_0) = \left.\frac{\partial f}{\partial \mathbf{u}}\right|_{0}
 \subsection{PID 控制器实现}
 \russiansubsectiontitle{Реализация PID-регулятора}
 
-PID 控制器（\texttt{PIDController.py}）采用四级联结构。设期望腿长 $L_0^d$ 与期望腿极角 $\varphi_0^d = \pi/2$（站立位），由 VMC 逆运动学得到关节目标 $\varphi_1^d, \varphi_4^d$，关节内环按经典 PID 计算关节力矩：
+PID 控制器（\texttt{PIDController.py}）采用四级联结构（见\cref{fig:pidcascade}：位置外环 $\to$ pitch 内环 $\to$ 轮力矩；yaw PID 差分；VMC 逆 $\to$ 关节内环）。设期望腿长 $L_0^d$ 与期望腿极角 $\varphi_0^d = \pi/2$（站立位），由 VMC 逆运动学得到关节目标 $\varphi_1^d, \varphi_4^d$，关节内环按经典 PID 计算关节力矩：
 \begin{equation}
 \label{eq:pid-joint}
 \tau_i = K_p^J e_{\varphi_i} + K_i^J\!\!\int e_{\varphi_i}\,dt + K_d^J \dot{e}_{\varphi_i},\quad i \in \{1, 4\}
@@ -510,9 +540,30 @@ A^T P + P A - P B R^{-1} B^T P + Q = 0,\quad K = R^{-1} B^T P
 \label{eq:lqr-interp}
 K(L_0) = (1 - t) K_i + t K_{i+1},\quad t = \frac{L_0 - L_0^{(i)}}{L_0^{(i+1)} - L_0^{(i)}}
 \end{equation}
-权重矩阵取 $Q = \mathrm{diag}(50, 1, 800, 100, 7000, 1)$、$R = \mathrm{diag}(20, 1)$，体现「车身倾角与位移误差优先收敛、轮力矩适度抑制」的设计偏好。CARE 求解使用 \texttt{scipy.linalg.solve\_continuous\_are}。
+权重矩阵取 $Q = \mathrm{diag}(50, 1, 800, 100, 7000, 1)$、$R = \mathrm{diag}(20, 1)$，体现「车身倾角与位移误差优先收敛、轮力矩适度抑制」的设计偏好。CARE 求解使用 \texttt{scipy.linalg.solve\_continuous\_are}。离线打表得到的 $K$ 矩阵各分量随 $L_0$ 的变化曲线见\cref{fig:lqrk}，可以看到 pitch 通道增益 $K_{1,5}$ 在 $L_0 \in [0.10, 0.40]\,\mathrm{m}$ 范围内显著变化，固定增益反馈在大腿长偏移下确有失稳风险。
 
-为保证左右腿独立控制并避免互扰，控制器对左、右腿分别取一份状态向量并各运行一路 LQR 反馈，得到两路 $T_p$（分别作用于左右髋）；轮力矩 $T$ 取两路平均后再叠加 yaw PID 差分。
+LQR 离线打表与运行时插值的整体流程参见\cref{alg:lqr-tab}。为保证左右腿独立控制并避免互扰，控制器对左、右腿分别取一份状态向量并各运行一路 LQR 反馈，得到两路 $T_p$（分别作用于左右髋）；轮力矩 $T$ 取两路平均后再叠加 yaw PID 差分。
+
+\begin{algorithm}[H]
+\caption{LQR $K(L_0)$ 离线打表 + 运行时线性插值}\label{alg:lqr-tab}
+\begin{algorithmic}[1]
+\REQUIRE 物理参数 $\theta_\mathrm{p}$；权重矩阵 $Q, R$；样点数 $N_K$；区间 $[L_0^\mathrm{lo}, L_0^\mathrm{hi}]$
+\STATE \textbf{// 离线阶段}
+\STATE $\{L_0^{(i)}\}_{i=1}^{N_K} \leftarrow$ 在 $[L_0^\mathrm{lo}, L_0^\mathrm{hi}]$ 等距采样
+\FOR{$i = 1, \dots, N_K$}
+  \STATE $(A_i, B_i) \leftarrow$ 对 $f(\cdot;L_0^{(i)})$ 在 $\mathbf{x}=\mathbf{0}, \mathbf{u}=\mathbf{0}$ 做有限差分线性化
+  \STATE $P_i \leftarrow \mathtt{solve\_continuous\_are}(A_i, B_i, Q, R)$
+  \STATE $K_i \leftarrow R^{-1} B_i^T P_i$
+\ENDFOR
+\STATE 写入 \texttt{lqr\_config.json}：$\{(L_0^{(i)}, K_i)\}$
+\STATE \textbf{// 运行时阶段（每个控制周期 $T_c$ 执行一次）}
+\STATE 读取当前实测 $L_0$；二分查找 $i$ 使 $L_0^{(i)} \le L_0 < L_0^{(i+1)}$
+\STATE $t \leftarrow (L_0 - L_0^{(i)}) / (L_0^{(i+1)} - L_0^{(i)})$
+\STATE $K(L_0) \leftarrow (1-t)\,K_i + t\,K_{i+1}$
+\STATE 由状态估计器读取 $\mathbf{x}$；$\mathbf{u} \leftarrow -K(L_0)\,\mathbf{x}$
+\RETURN $\mathbf{u} = (T, T_p)$
+\end{algorithmic}
+\end{algorithm}
 
 \begin{figure}[H]
   \centering
@@ -547,14 +598,38 @@ J(\mathbf{U}) = \tfrac{1}{2}\mathbf{U}^T H \mathbf{U} + (F_x \mathbf{x}_0)^T \ma
 \end{equation}
 其中 $S_x \in \mathbb{R}^{Nn_x \times n_x}, S_u \in \mathbb{R}^{Nn_x \times Nn_u}$ 为预测块矩阵，$H = 2(S_u^T \bar Q S_u + \bar R)$、$F_x = 2 S_u^T \bar Q S_x$。参数取 $N = 15$、$Q = \mathrm{diag}(50, 1, 350, 100, 5000, 1)$、$R = \mathrm{diag}(100, 1)$、$\mathbf{u}_{\min} = (-4, -10)$、$\mathbf{u}_{\max} = (4, 10)$（单位 N$\cdot$m），与 MJCF 中的执行器 \texttt{ctrlrange} 一致。
 
-\textbf{求解器}采用\textbf{自实现的投影梯度下降（PGD）}：以前一周期解整体左移一位作为本周期 warm start，PGD 步长取 $\alpha = 1/\lambda_{\max}(H)$，最多迭代 30 次：
+\textbf{求解器}采用\textbf{自实现的投影梯度下降（PGD）}，整体流程见\cref{fig:mpcflow}与\cref{alg:mpc-pgd}：以前一周期解整体左移一位作为本周期 warm start，PGD 步长取 $\alpha = 1/\lambda_{\max}(H)$，最多迭代 30 次：
 \begin{equation}
 \label{eq:pgd}
 \mathbf{U}^{(k+1)} = \Proj_{[\mathbf{u}_{\min}, \mathbf{u}_{\max}]}\!\left(\mathbf{U}^{(k)} - \alpha\,(H\mathbf{U}^{(k)} + g)\right)
 \end{equation}
 其中 $g = F_x \mathbf{x}_0$，投影即逐元素裁剪。算法首先尝试无约束闭式解 $\mathbf{U}^* = -H^{-1}g$，若该解已在可行域内则直接采用；否则在 warm start 与无约束解中选取代价较低者作为 PGD 初值。该实现避免了对外部 QP 求解器（如 OSQP）的依赖，更利于嵌入式部署。
 
-与 LQR 类似，预测模型 $(A_d, B_d, P)$ 也按 $L_0$ 离线打表（\texttt{mpc\_config.json}），运行时三者均按式~\eqref{eq:lqr-interp} 线性插值。左右腿仍各跑一路 MPC，各自维护 warm start。
+与 LQR 类似，预测模型 $(A_d, B_d, P)$ 也按 $L_0$ 离线打表（\texttt{mpc\_config.json}），运行时三者均按式~\eqref{eq:lqr-interp} 线性插值。左右腿仍各跑一路 MPC，各自维护 warm start。\cref{alg:mpc-pgd} 给出了 MPC 在每个控制周期内的完整求解流程，包括模型插值、矩阵装配、闭式可行性检查、warm-start 选择与 PGD 迭代。
+
+\begin{algorithm}[H]
+\caption{MPC condensed-QP + PGD 单步求解}\label{alg:mpc-pgd}
+\begin{algorithmic}[1]
+\REQUIRE 当前状态 $\mathbf{x}_0$；当前腿长 $L_0$；上周期解 $\mathbf{U}_\mathrm{prev}$；最大迭代次数 $K_\mathrm{max} = 30$
+\STATE $(A_d, B_d, P) \leftarrow$ 按 $L_0$ 在 \texttt{mpc\_config.json} 中线性插值
+\STATE 构造预测块矩阵 $S_x, S_u$ 与块对角权重 $\bar Q = \mathrm{blkdiag}(Q,\dots,Q,P)$，$\bar R = \mathrm{blkdiag}(R,\dots,R)$
+\STATE $H \leftarrow 2(S_u^T \bar Q S_u + \bar R)$；$\quad g \leftarrow 2 S_u^T \bar Q S_x\, \mathbf{x}_0$
+\STATE $\mathbf{U}^* \leftarrow -H^{-1} g$ \COMMENT{无约束闭式解}
+\IF{$\mathbf{u}_\mathrm{min} \le \mathbf{U}^* \le \mathbf{u}_\mathrm{max}$ 逐元素成立}
+  \STATE $\mathbf{U} \leftarrow \mathbf{U}^*$ \COMMENT{可行，跳过 PGD}
+\ELSE
+  \STATE $\mathbf{U}_\mathrm{shift} \leftarrow$ 将 $\mathbf{U}_\mathrm{prev}$ 整体左移一位，末位补零 \COMMENT{warm start}
+  \STATE $\mathbf{U}^{(0)} \leftarrow \arg\min_{\mathbf{U} \in \{\mathbf{U}_\mathrm{shift}, \mathbf{U}^*\}} J(\mathbf{U})$
+  \STATE $\alpha \leftarrow 1 / \lambda_\mathrm{max}(H)$
+  \FOR{$k = 0, \dots, K_\mathrm{max}-1$}
+    \STATE $\mathbf{U}^{(k+1)} \leftarrow \Proj_{[\mathbf{u}_\mathrm{min}, \mathbf{u}_\mathrm{max}]}\bigl(\mathbf{U}^{(k)} - \alpha\,(H \mathbf{U}^{(k)} + g)\bigr)$
+  \ENDFOR
+  \STATE $\mathbf{U} \leftarrow \mathbf{U}^{(K_\mathrm{max})}$
+\ENDIF
+\STATE $\mathbf{U}_\mathrm{prev} \leftarrow \mathbf{U}$ \COMMENT{保存供下周期 warm start}
+\RETURN $\mathbf{u}_0 = \mathbf{U}[0:n_u]$
+\end{algorithmic}
+\end{algorithm}在未触发输入约束的工况下，MPC 第一步控制律 $\mathbf{u}_0$ 可视为关于 $\mathbf{x}_0$ 的线性反馈，其等效反馈增益 $K_\mathrm{MPC}$ 与 LQR 增益 $K_\mathrm{LQR}$ 的对比见\cref{fig:mpcvslqr}：两者在 $L_0$ 全程几乎重合，从数值上验证了「无约束 MPC ≡ LQR」这一理论结论，也说明 MPC 相比 LQR 的优势完全来自显式输入约束的存在。
 
 \begin{figure}[H]
   \centering
@@ -589,12 +664,12 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
 为系统对比 PID、LQR、MPC 三类控制器的性能，本研究在 MuJoCo 仿真环境下设计了六类典型工况：
 
 \begin{itemize}
-\item \textbf{工况 1（平衡保持）}：所有目标量置零、$L_0^d = 0.20\,\mathrm{m}$，仿真时长 10\,s，重点考察各控制器在零工作点附近的稳态精度与抖动；
-\item \textbf{工况 2（位置阶跃）}：$x^d$ 在 $t = 1\,\mathrm{s}$ 由 0 阶跃至 0.5\,m，重点考察位移响应的上升时间、超调与稳态误差；
-\item \textbf{工况 3（速度跟踪）}：$\dot x^d$ 在 $t = 1\,\mathrm{s}$ 由 0 阶跃至 0.3\,m/s，进入「速度模式」（位置误差冻结），重点考察速度跟踪精度；
-\item \textbf{工况 4（yaw 阶跃）}：$\mathrm{yaw}^d$ 由 0 阶跃至 $\pi/4\,\mathrm{rad}$，重点考察 yaw 跟踪与左右轮差分的协调；
-\item \textbf{工况 5（腿长动态变化）}：$L_0^d$ 在 $[0.15, 0.35]\,\mathrm{m}$ 之间以 0.1\,Hz 正弦变化，重点考察 LQR 增益插值与 MPC 模型插值在时变模型下的稳定性；
-\item \textbf{工况 6（瞬态扰动恢复）}：在车身上施加幅值 30\,N、持续 0.1\,s 的水平推力，重点考察轮力矩饱和场景下的扰动恢复能力。
+\item \textbf{工况 1（平衡保持）}（响应曲线见\cref{fig:case1}）：所有目标量置零、$L_0^d = 0.20\,\mathrm{m}$，仿真时长 10\,s，重点考察各控制器在零工作点附近的稳态精度与抖动；
+\item \textbf{工况 2（位置阶跃）}（响应曲线见\cref{fig:case2}）：$x^d$ 在 $t = 1\,\mathrm{s}$ 由 0 阶跃至 0.5\,m，重点考察位移响应的上升时间、超调与稳态误差；
+\item \textbf{工况 3（速度跟踪）}（响应曲线见\cref{fig:case3}）：$\dot x^d$ 在 $t = 1\,\mathrm{s}$ 由 0 阶跃至 0.3\,m/s，进入「速度模式」（位置误差冻结），重点考察速度跟踪精度；
+\item \textbf{工况 4（yaw 阶跃）}（响应曲线见\cref{fig:case4}）：$\mathrm{yaw}^d$ 由 0 阶跃至 $\pi/4\,\mathrm{rad}$，重点考察 yaw 跟踪与左右轮差分的协调；
+\item \textbf{工况 5（腿长动态变化）}（响应曲线见\cref{fig:case5}）：$L_0^d$ 在 $[0.15, 0.35]\,\mathrm{m}$ 之间以 0.1\,Hz 正弦变化，重点考察 LQR 增益插值与 MPC 模型插值在时变模型下的稳定性；
+\item \textbf{工况 6（瞬态扰动恢复）}（响应曲线见\cref{fig:case6}）：在车身上施加幅值 30\,N、持续 0.1\,s 的水平推力，重点考察轮力矩饱和场景下的扰动恢复能力。
 \end{itemize}
 
 为模拟传感器噪声，所有 IMU 通道均叠加方差 $\sigma^2 = 10^{-4}$ 的零均值白噪声。
@@ -602,7 +677,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
 \subsection{仿真实验结果}
 \russiansubsectiontitle{Результаты симуляции}
 
-\textbf{工况 1（平衡保持）} 三种控制器均能在 $L_0 = 0.20\,\mathrm{m}$ 标定点附近稳态平衡。PID 在 pitch 通道上呈现约 $\pm 0.5^\circ$ 的稳态抖动（来自位置外环的等效低增益）；LQR 与 MPC 由于直接利用六维状态信息，pitch 抖动小于 $\pm 0.1^\circ$，位移漂移亦更小。
+\textbf{工况 1（平衡保持）}（响应曲线见\cref{fig:case1}） 三种控制器均能在 $L_0 = 0.20\,\mathrm{m}$ 标定点附近稳态平衡。PID 在 pitch 通道上呈现约 $\pm 0.5^\circ$ 的稳态抖动（来自位置外环的等效低增益）；LQR 与 MPC 由于直接利用六维状态信息，pitch 抖动小于 $\pm 0.1^\circ$，位移漂移亦更小。
 
 \begin{figure}[H]
   \centering
@@ -611,7 +686,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
   \label{fig:case1}
 \end{figure}
 
-\textbf{工况 2（位置阶跃）} 在 0.5\,m 位置阶跃下，PID 上升时间最短但伴随 pitch 反向超调（车身先后倾再前倾），LQR 通过状态反馈使 pitch 与位移协调收敛，MPC 在保持类似响应的同时使轮力矩更平滑。
+\textbf{工况 2（位置阶跃）}（响应曲线见\cref{fig:case2}） 在 0.5\,m 位置阶跃下，PID 上升时间最短但伴随 pitch 反向超调（车身先后倾再前倾），LQR 通过状态反馈使 pitch 与位移协调收敛，MPC 在保持类似响应的同时使轮力矩更平滑。
 
 \begin{figure}[H]
   \centering
@@ -620,7 +695,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
   \label{fig:case2}
 \end{figure}
 
-\textbf{工况 3（速度跟踪）} 三种控制器均能跟踪 0.3\,m/s 的速度阶跃；PID 的稳态速度误差较大（约 0.04\,m/s），LQR 与 MPC 的稳态误差均在 0.01\,m/s 以内。
+\textbf{工况 3（速度跟踪）}（响应曲线见\cref{fig:case3}） 三种控制器均能跟踪 0.3\,m/s 的速度阶跃；PID 的稳态速度误差较大（约 0.04\,m/s），LQR 与 MPC 的稳态误差均在 0.01\,m/s 以内。
 
 \begin{figure}[H]
   \centering
@@ -629,7 +704,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
   \label{fig:case3}
 \end{figure}
 
-\textbf{工况 4（yaw 阶跃）} yaw 控制由共用的 yaw PID 完成，三种控制器在 yaw 通道的响应基本一致，差异主要体现在 yaw 转动期间车身平衡的协调上：PID 在 yaw 转动峰值期间 pitch 误差略增，LQR 与 MPC 几乎不受影响。
+\textbf{工况 4（yaw 阶跃）}（响应曲线见\cref{fig:case4}） yaw 控制由共用的 yaw PID 完成，三种控制器在 yaw 通道的响应基本一致，差异主要体现在 yaw 转动期间车身平衡的协调上：PID 在 yaw 转动峰值期间 pitch 误差略增，LQR 与 MPC 几乎不受影响。
 
 \begin{figure}[H]
   \centering
@@ -638,7 +713,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
   \label{fig:case4}
 \end{figure}
 
-\textbf{工况 5（腿长动态变化）} 当 $L_0^d$ 在 $[0.15, 0.35]\,\mathrm{m}$ 之间正弦变化时，PID 由于反馈增益固定，pitch 通道在 $L_0$ 偏离 0.20\,m 时呈现持续小幅振荡；LQR 借助式~\eqref{eq:lqr-interp} 的增益插值保持平稳；MPC 模型同步插值后表现与 LQR 相当，且轮力矩更平滑。这一工况是体现 LQR/MPC「时变线性化 + 增益调度」设计价值的核心实验。
+\textbf{工况 5（腿长动态变化）}（响应曲线见\cref{fig:case5}） 当 $L_0^d$ 在 $[0.15, 0.35]\,\mathrm{m}$ 之间正弦变化时，PID 由于反馈增益固定，pitch 通道在 $L_0$ 偏离 0.20\,m 时呈现持续小幅振荡；LQR 借助式~\eqref{eq:lqr-interp} 的增益插值保持平稳；MPC 模型同步插值后表现与 LQR 相当，且轮力矩更平滑。这一工况是体现 LQR/MPC「时变线性化 + 增益调度」设计价值的核心实验。
 
 \begin{figure}[H]
   \centering
@@ -647,7 +722,7 @@ F_0 = K_p^{L_0}(L_0^d - L_0) + K_i^{L_0}\!\!\int(L_0^d - L_0)\,dt + K_d^{L_0}(\d
   \label{fig:case5}
 \end{figure}
 
-\textbf{工况 6（瞬态扰动恢复）} 30\,N、0.1\,s 的水平推力会显著激发车身倾角偏离。PID 与 LQR 均会产生瞬时 $|T| \to 4\,\mathrm{N\cdot m}$ 的轮力矩饱和，但 LQR 由于权重 $R$ 较小，饱和持续时间更长；MPC 通过式~\eqref{eq:mpc-constraints} 的盒约束在饱和边界自适应分配 $T$ 与 $T_p$，pitch 误差峰值显著低于另外两者。
+\textbf{工况 6（瞬态扰动恢复）}（响应曲线见\cref{fig:case6}） 30\,N、0.1\,s 的水平推力会显著激发车身倾角偏离。PID 与 LQR 均会产生瞬时 $|T| \to 4\,\mathrm{N\cdot m}$ 的轮力矩饱和，但 LQR 由于权重 $R$ 较小，饱和持续时间更长；MPC 通过式~\eqref{eq:mpc-constraints} 的盒约束在饱和边界自适应分配 $T$ 与 $T_p$，pitch 误差峰值显著低于另外两者。
 
 \begin{figure}[H]
   \centering
