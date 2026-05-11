@@ -9,5 +9,6 @@
 - 不要生成 PNG/JPG 位图作为正式插图；如论文导出需要位图，由用户自行将 SVG 转成位图，Claude 不预先生成。
 - **首元素是覆盖整个 viewBox 的白色背景矩形**（`<rect x="0" y="0" width="..." height="..." fill="#ffffff"/>`），避免嵌入到深色主题或带透明背景的容器时露底。
 - 学位论文风格优先：黑白主调，浅灰填充用 `#f0f0f0`/`#fafafa` 等克制色；线条统一 1.0–1.4 px，避免大面积高饱和填充与渐变阴影。
-- 字体使用 `'Times New Roman','SimSun','Songti SC',serif`，与本科论文标准排版一致；正文字号 ≥ 10.5 pt，标题加粗。
+- 字体 family 链首位放 `'Noto Serif CJK SC'`，依次跟上 `'Source Han Serif SC'` / `'Songti SC'` / `'SimSun'` / `'Times New Roman'` / `serif`：Noto Serif CJK SC 在 Linux 学位论文构建机器上一般可用，且自带拉丁字形；其它项作为 Windows 编辑预览时的兜底。`Times New Roman` 不能放首位，否则 cairosvg 等不会按字符后备的工具会优先选 Liberation Serif，结果中文全是豆腐。正文字号 ≥ 10.5 pt，标题加粗。
+- SVG → PDF 转换走 `thesis_latex/build_figures.py`（基于 WeasyPrint，用 Pango 做按字符字体后备），不要用 cairosvg：cairosvg 只对整段文字挑一个字体，缺字符就直接渲染为方块。
 - 每张图的 SVG 顶部用 `<!-- ... -->` 注释写明：图编号、图题、对应论文章节、关键依赖（如有）。

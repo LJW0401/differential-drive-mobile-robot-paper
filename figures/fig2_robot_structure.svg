@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 560"
-     font-family="'Times New Roman','SimSun','Songti SC',serif" font-size="12" fill="#000">
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC','SimSun','Times New Roman',serif" font-size="12" fill="#000">
   <style>
     .lbl    { font-size: 12px; fill: #000; }
     .small  { font-size: 10.5px; fill: #333; }
