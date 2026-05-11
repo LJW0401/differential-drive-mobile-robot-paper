@@ -11,7 +11,9 @@
     .mono     { font-family: 'Consolas','Courier New',monospace; font-size: 11.5px; }
     .mid      { text-anchor: middle; }
     .arr      { fill: none; stroke: #000; stroke-width: 1.1; }
-    .lblbg    { paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+    /* WeasyPrint 不支持 paint-order，原 stroke 描边方案会让字被白色描边吃成空心
+       白字；改为黑字无描边，位置安排在箭头间隙里，不再依赖白底凸显。 */
+    .lblbg    { fill: #000; stroke: none; }
   </style>
 
   <defs>
@@ -53,9 +55,10 @@
     <path d="M 460 140 V 230" marker-end="url(#ar)"/>
     <path d="M 740 140 V 230" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="180" y="186">MJCF·物理参数</text>
-  <text class="small lblbg mid" x="460" y="186">A(L₀), B(L₀), K(L₀)</text>
-  <text class="small lblbg mid" x="740" y="186">J(φ) 雅可比</text>
+  <!-- 下行箭头标签：从居中改成左对齐 + 偏移到箭头右侧，避免压线 -->
+  <text class="small lblbg" x="190" y="186">MJCF·物理参数</text>
+  <text class="small lblbg" x="470" y="186">A(L₀), B(L₀), K(L₀)</text>
+  <text class="small lblbg" x="750" y="186">J(φ) 雅可比</text>
 
   <!-- ===== ② / ③ / ④ 三列 ===== -->
   <!-- ② 仿真 -->
@@ -139,14 +142,15 @@
     <path d="M 320 270 H 340" marker-end="url(#ar)"/>
     <path d="M 340 390 H 320" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="330" y="262">state x</text>
+  <!-- 闭环水平箭头标签：上行下行各往外抬一行，避开短水平箭头 -->
+  <text class="small lblbg mid" x="330" y="258">state x</text>
   <text class="small lblbg mid" x="330" y="406">control u</text>
 
   <!-- control → aux -->
   <g class="arr">
     <path d="M 620 270 H 640" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="630" y="262">Tₚ</text>
+  <text class="small lblbg mid" x="630" y="258">Tₚ</text>
 
   <!-- ===== ③+ 双腿独立控制 ===== -->
   <g transform="translate(40,490)">
@@ -179,13 +183,14 @@
   <g class="arr">
     <path d="M 480 430 V 490" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="480" y="465">两腿独立求解</text>
+  <!-- 垂直箭头标签：从压线居中改成左对齐贴在箭头右侧 -->
+  <text class="small lblbg" x="490" y="465">两腿独立求解</text>
 
   <!-- 双腿 → 仿真（torque 回馈，斜上） -->
   <g class="arr" stroke-dasharray="0">
     <path d="M 220 490 C 220 460, 200 460, 180 430" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="155" y="465">τ + 轮力矩</text>
+  <text class="small lblbg" text-anchor="end" x="160" y="465">τ + 轮力矩</text>
 
   <!-- ===== ⑤ 外部交互 ===== -->
   <g transform="translate(40,650)">
@@ -212,5 +217,6 @@
   <g class="arr" stroke-dasharray="5 3">
     <path d="M 460 650 V 590" marker-end="url(#ar)"/>
   </g>
-  <text class="small lblbg mid" x="460" y="624">UDP / 键盘指令</text>
+  <!-- 外部交互上行虚线箭头标签：左对齐贴到右侧 -->
+  <text class="small lblbg" x="470" y="624">UDP / 键盘指令</text>
 </svg>

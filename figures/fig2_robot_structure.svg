@@ -8,7 +8,8 @@
     .ital   { font-style: italic; }
     .mid    { text-anchor: middle; }
     .end    { text-anchor: end; }
-    .lblbg  { paint-order: stroke; stroke: #fff; stroke-width: 4; stroke-linejoin: round; }
+    /* WeasyPrint 不支持 paint-order；原 stroke 描边方案会把字吃成空心白字 */
+    .lblbg  { fill: #000; stroke: none; }
     .pnl    { fill: none; stroke: #000; stroke-width: 1; }
     .body   { fill: #f4f4f4; stroke: #000; stroke-width: 1.2; }
     .leg    { fill: none; stroke: #000; stroke-width: 2; }
