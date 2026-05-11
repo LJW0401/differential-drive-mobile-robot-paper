@@ -257,6 +257,15 @@ MuJoCo（Multi-Joint dynamics with Contact）由 Todorov 等人提出\cite{Todor
   \label{fig:robot}
 \end{figure}
 
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.95\textwidth]{fig3_five_bar_kinematics}
+  \caption{五连杆机构与虚拟腿参数定义}
+  \label{fig:fivebar}
+\end{figure}
+
+\cref{fig:fivebar} 给出了单条腿五连杆机构与虚拟腿之间的参数对应关系：固定铰 $A$、$E$ 安装于机体，中点 $M = (l_5/2, 0)$ 取为虚拟腿极点；驱动关节角 $(\varphi_1, \varphi_4)$ 经闭链约束解出从动角 $(\varphi_2, \varphi_3)$，进而由几何关系得到虚拟腿长 $L_0 = |MC|$ 与极角 $\varphi_0$。上层平衡控制器输出的虚拟腿端力 $F_0$（沿 $MC$ 方向）与髋部虚拟力矩 $T_p$ 经雅可比 $J(\varphi_1, \varphi_4)$ 反映射为驱动关节力矩 $(\tau_1, \tau_4)$，由此把多杆耦合的关节空间控制问题降维为「腿长 + 车身倾角」两个解耦通道。
+
 设计上之所以采用「五连杆 VMC + 倒立摆」的双层建模思路，是因为五连杆机构在关节空间下耦合严重、调参困难，而 VMC 将其降维为两个物理直观的虚拟控制量，从而把「腿长跟踪」与「车身平衡」两个任务自然分通道处理。在 VMC 之上再以倒立摆模型描述车身平衡问题，状态向量 $\mathbf{x} = (\theta, \dot\theta, x, \dot x, \varphi, \dot\varphi)^T$ 中前两项描述虚拟腿摆角，中两项描述车身平动，后两项描述车身倾角，构成完整的小角度倒立摆模型。模块对外仅暴露「VMC 正/逆运动学、雅可比、连续/离散动力学函数」三组接口，对内屏蔽具体推导细节。
 
 \section{仿真平台模块设计}

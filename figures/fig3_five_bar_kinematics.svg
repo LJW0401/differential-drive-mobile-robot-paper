@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  图编号：图 3
+  图题：  五连杆机构 + 虚拟腿参数定义图
+  论文章节：3.2 机构与动力学建模模块设计
+  关键依赖：与 five_link_ctrl_simulation/VMC.py 的正运动学/雅可比保持一致
+            - 固定铰 A=(0,0)，E=(l5,0)
+            - 驱动关节角 φ1=∠xAB, φ4=∠xED
+            - 中间连杆 φ2=∠xBC, φ3=∠xDC
+            - 虚拟腿极点 M=(l5/2, 0)，L0=|MC|，φ0=∠xMC
+            - 雅可比将 (F0, Tp) ↦ (τ1, τ4)
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 920 560" width="920" height="560"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC','SimSun','Times New Roman',serif">
+  <style>
+    .bg     { fill:#ffffff; }
+    .link   { fill:none; stroke:#000; stroke-width:2.2; stroke-linecap:round; }
+    .vleg   { fill:none; stroke:#000; stroke-width:1.6; stroke-dasharray:6 4; }
+    .axis   { fill:none; stroke:#444; stroke-width:0.8; }
+    .arrow  { fill:none; stroke:#000; stroke-width:1.4; }
+    .arc    { fill:none; stroke:#666; stroke-width:1.0; }
+    .joint  { fill:#ffffff; stroke:#000; stroke-width:1.6; }
+    .pivot  { fill:#000; }
+    .foot   { fill:#f0f0f0; stroke:#000; stroke-width:1.6; }
+    .lbl    { font-size:18px; fill:#000; }
+    .small  { font-size:14px; fill:#000; }
+    .tiny   { font-size:12px; fill:#444; }
+    .mid    { text-anchor:middle; }
+    .italic { font-style:italic; }
+    .force  { fill:none; stroke:#000; stroke-width:2.0; }
+    .torque { fill:none; stroke:#000; stroke-width:1.6; }
+    .panel  { fill:none; stroke:#888; stroke-width:0.8; stroke-dasharray:3 3; }
+  </style>
+
+  <rect class="bg" x="0" y="0" width="920" height="560"/>
+
+  <!-- 标题 -->
+  <text class="lbl mid" x="460" y="34" font-weight="bold">五连杆机构与虚拟腿参数定义</text>
+  <text class="tiny mid" x="460" y="54">A、E 为固定铰，A B C D 4 个铰链 + 2 段连杆构成闭链；M 为虚拟腿极点</text>
+
+  <!-- ============================ 左侧主图：五连杆机构 ============================ -->
+  <g transform="translate(0,0)">
+    <!-- 底盘横梁（机体安装面 AE） -->
+    <rect x="230" y="100" width="320" height="22" fill="#fafafa" stroke="#000" stroke-width="1.4"/>
+    <text class="small" x="556" y="115">机体安装面</text>
+
+    <!-- 几何坐标 -->
+    <!-- A=(260,122) E=(520,122) M=(390,122) -->
+    <!-- 选取 phi1≈-110°, phi4≈-70°（落在工作空间内的对称构型） -->
+    <!-- B = A + l1*(cosφ1,sinφ1); D = E + l4*(cosφ4,sinφ4); 取近似坐标 -->
+    <!-- A=(260,122), B=(220,255)  l1≈140 -->
+    <!-- E=(520,122), D=(560,255)  l4≈140 -->
+    <!-- C=(390,420)               BC≈210, DC≈210 -->
+
+    <!-- 五连杆：AE (机体), AB, BC, CD, DE -->
+    <line class="link" x1="260" y1="122" x2="220" y2="255"/>  <!-- AB l1 -->
+    <line class="link" x1="220" y1="255" x2="390" y2="420"/>  <!-- BC l2 -->
+    <line class="link" x1="390" y1="420" x2="560" y2="255"/>  <!-- CD l3 -->
+    <line class="link" x1="560" y1="255" x2="520" y2="122"/>  <!-- DE l4 -->
+    <!-- AE 已由 chassis 矩形体现，再画一条参考线 -->
+    <line class="axis" x1="260" y1="122" x2="520" y2="122"/>
+
+    <!-- 虚拟腿 MC -->
+    <line class="vleg" x1="390" y1="122" x2="390" y2="420"/>
+    <!-- 虚拟腿端力 F0：沿 MC 方向，向上箭头（足端 → 体） -->
+    <defs>
+      <marker id="arrhd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+      </marker>
+      <marker id="arrhd_sm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+      </marker>
+      <marker id="arrhd_open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+        <path d="M0,0 L10,5 L0,10 z" fill="#666"/>
+      </marker>
+    </defs>
+
+    <line class="force" x1="390" y1="420" x2="390" y2="350" marker-end="url(#arrhd)"/>
+    <text class="lbl" x="400" y="380" font-style="italic">F</text>
+    <text class="small" x="416" y="386">0</text>
+
+    <!-- Tp：作用在虚拟腿与机体接口处的扭矩，紧凑弧线避开副标题 -->
+    <path class="torque" d="M 374 92 a 16 16 0 1 0 32 -2" marker-end="url(#arrhd_sm)"/>
+    <text class="lbl italic" x="412" y="80">T</text>
+    <text class="small" x="426" y="86">p</text>
+
+    <!-- 节点标记 -->
+    <!-- A 固定铰：实心 + 三角支座 -->
+    <polygon class="foot" points="260,122 248,144 272,144"/>
+    <line class="axis" x1="244" y1="144" x2="276" y2="144"/>
+    <circle class="pivot" cx="260" cy="122" r="4"/>
+    <!-- E 固定铰 -->
+    <polygon class="foot" points="520,122 508,144 532,144"/>
+    <line class="axis" x1="504" y1="144" x2="536" y2="144"/>
+    <circle class="pivot" cx="520" cy="122" r="4"/>
+    <!-- M 虚拟极点（A、E 中点）-->
+    <circle cx="390" cy="122" r="3.5" fill="#000"/>
+    <!-- B / D：可动铰链 -->
+    <circle class="joint" cx="220" cy="255" r="5"/>
+    <circle class="joint" cx="560" cy="255" r="5"/>
+    <!-- C：足端 -->
+    <circle class="joint" cx="390" cy="420" r="6"/>
+
+    <!-- 点名标签 -->
+    <text class="lbl" x="244" y="115">A</text>
+    <text class="lbl" x="528" y="115">E</text>
+    <text class="lbl" x="378" y="115">M</text>
+    <text class="lbl" x="198" y="262">B</text>
+    <text class="lbl" x="566" y="262">D</text>
+    <text class="lbl" x="396" y="438">C</text>
+
+    <!-- 连杆长度标注 -->
+    <text class="small italic" x="225" y="195">l</text>
+    <text class="tiny" x="234" y="199">1</text>
+
+    <text class="small italic" x="295" y="350">l</text>
+    <text class="tiny" x="303" y="354">2</text>
+
+    <text class="small italic" x="478" y="350">l</text>
+    <text class="tiny" x="486" y="354">3</text>
+
+    <text class="small italic" x="558" y="195">l</text>
+    <text class="tiny" x="566" y="199">4</text>
+
+    <text class="small italic" x="382" y="138">l</text>
+    <text class="tiny" x="390" y="142">5</text>
+
+    <!-- 关节角 φ1, φ4 -->
+    <!-- φ1 在 A 处：从 +x 轴到 AB 方向 -->
+    <path class="arc" d="M 290 122 A 30 30 0 0 1 273 148" marker-end="url(#arrhd_open)"/>
+    <text class="small italic" x="294" y="148">φ</text>
+    <text class="tiny" x="307" y="152">1</text>
+
+    <!-- φ4 在 E 处：从 +x 轴到 ED 方向 -->
+    <path class="arc" d="M 550 122 A 30 30 0 0 1 533 148" marker-end="url(#arrhd_open)"/>
+    <text class="small italic" x="552" y="148">φ</text>
+    <text class="tiny" x="565" y="152">4</text>
+
+    <!-- φ2 在 B 处：从 +x 到 BC 方向 -->
+    <path class="arc" d="M 250 255 A 30 30 0 0 1 238 280" marker-end="url(#arrhd_open)"/>
+    <text class="small italic" x="252" y="282">φ</text>
+    <text class="tiny" x="265" y="286">2</text>
+
+    <!-- φ3 在 D 处 -->
+    <path class="arc" d="M 530 255 A 30 30 0 0 0 542 280" marker-end="url(#arrhd_open)"/>
+    <text class="small italic" x="510" y="282">φ</text>
+    <text class="tiny" x="523" y="286">3</text>
+
+    <!-- 虚拟腿 L0 标注 -->
+    <text class="lbl italic" x="402" y="285">L</text>
+    <text class="small" x="416" y="291">0</text>
+
+    <!-- φ0 极角：在 M 处，自 +x 到 MC -->
+    <path class="arc" d="M 425 122 A 35 35 0 0 1 411 152" marker-end="url(#arrhd_open)"/>
+    <text class="small italic" x="425" y="150">φ</text>
+    <text class="tiny" x="438" y="154">0</text>
+
+    <!-- 局部坐标轴（机体坐标，原点在 A） -->
+    <g transform="translate(160,122)">
+      <line class="axis" x1="0" y1="0" x2="40" y2="0" marker-end="url(#arrhd_open)"/>
+      <line class="axis" x1="0" y1="0" x2="0" y2="40" marker-end="url(#arrhd_open)"/>
+      <text class="small italic" x="44" y="4">x</text>
+      <text class="small italic" x="6"  y="48">y</text>
+      <text class="tiny" x="-2" y="-6">机体系</text>
+    </g>
+  </g>
+
+  <!-- ============================ 右侧面板：参数表 + 雅可比关系 ============================ -->
+  <g transform="translate(620,90)">
+    <rect class="panel" x="0" y="0" width="280" height="430"/>
+    <text class="small mid" x="140" y="22" font-weight="bold">参数与映射关系</text>
+
+    <!-- 几何参数 -->
+    <text class="small" x="14" y="56" font-weight="bold">几何参数（与代码一致）</text>
+    <text class="small italic" x="14" y="80">l</text>
+    <text class="tiny"  x="22" y="84">1</text>
+    <text class="small" x="34" y="80">=</text>
+    <text class="small italic" x="48" y="80">l</text>
+    <text class="tiny"  x="56" y="84">4</text>
+    <text class="small" x="68" y="80">= 0.215 m</text>
+
+    <text class="small italic" x="14" y="102">l</text>
+    <text class="tiny"  x="22" y="106">2</text>
+    <text class="small" x="34" y="102">=</text>
+    <text class="small italic" x="48" y="102">l</text>
+    <text class="tiny"  x="56" y="106">3</text>
+    <text class="small" x="68" y="102">= 0.258 m</text>
+
+    <text class="small italic" x="14" y="124">l</text>
+    <text class="tiny"  x="22" y="128">5</text>
+    <text class="small" x="34" y="124">= 0（AE 同轴近似）</text>
+
+    <!-- 关节角变量 -->
+    <text class="small" x="14" y="158" font-weight="bold">关节空间 / 虚拟腿空间</text>
+    <text class="small" x="14" y="182">关节角：</text>
+    <text class="small italic" x="80" y="182">φ</text>
+    <text class="tiny"  x="93" y="186">1</text>
+    <text class="small" x="102" y="182">,</text>
+    <text class="small italic" x="112" y="182">φ</text>
+    <text class="tiny"  x="125" y="186">4</text>
+    <text class="small" x="138" y="182">（驱动）</text>
+
+    <text class="small" x="14" y="204">从动角：</text>
+    <text class="small italic" x="80" y="204">φ</text>
+    <text class="tiny"  x="93" y="208">2</text>
+    <text class="small" x="102" y="204">,</text>
+    <text class="small italic" x="112" y="204">φ</text>
+    <text class="tiny"  x="125" y="208">3</text>
+    <text class="small" x="138" y="204">（闭链约束求出）</text>
+
+    <text class="small" x="14" y="226">虚拟腿：</text>
+    <text class="small italic" x="80" y="226">L</text>
+    <text class="tiny"  x="91" y="230">0</text>
+    <text class="small" x="100" y="226">,</text>
+    <text class="small italic" x="110" y="226">φ</text>
+    <text class="tiny"  x="123" y="230">0</text>
+    <text class="small" x="138" y="226">（长度 / 极角）</text>
+
+    <!-- 正运动学 -->
+    <text class="small" x="14" y="262" font-weight="bold">正运动学（FK）</text>
+    <text class="small mid" x="140" y="288">
+      (
+      <tspan font-style="italic">φ</tspan><tspan font-size="10px" dy="3">1</tspan><tspan dy="-3">, </tspan>
+      <tspan font-style="italic">φ</tspan><tspan font-size="10px" dy="3">4</tspan><tspan dy="-3">)</tspan>
+      &#160;⟶&#160;
+      (<tspan font-style="italic">L</tspan><tspan font-size="10px" dy="3">0</tspan><tspan dy="-3">, </tspan>
+      <tspan font-style="italic">φ</tspan><tspan font-size="10px" dy="3">0</tspan><tspan dy="-3">)</tspan>
+    </text>
+
+    <!-- 雅可比力映射 -->
+    <text class="small" x="14" y="320" font-weight="bold">虚拟腿端力 → 关节力矩</text>
+    <text class="small mid" x="140" y="350">
+      [ <tspan font-style="italic">τ</tspan><tspan font-size="10px" dy="3">1</tspan><tspan dy="-3">, </tspan>
+      <tspan font-style="italic">τ</tspan><tspan font-size="10px" dy="3">4</tspan><tspan dy="-3"> ]</tspan><tspan>ᵀ</tspan>
+      &#160;=&#160;
+      <tspan font-style="italic">J</tspan>(<tspan font-style="italic">φ</tspan><tspan font-size="10px" dy="3">1</tspan><tspan dy="-3">,</tspan>
+      <tspan font-style="italic">φ</tspan><tspan font-size="10px" dy="3">4</tspan><tspan dy="-3">)</tspan>
+    </text>
+    <text class="small mid" x="140" y="372">
+      · [ <tspan font-style="italic">F</tspan><tspan font-size="10px" dy="3">0</tspan><tspan dy="-3">, </tspan>
+      <tspan font-style="italic">T</tspan><tspan font-size="10px" dy="3">p</tspan><tspan dy="-3"> ]</tspan><tspan>ᵀ</tspan>
+    </text>
+
+    <text class="tiny" x="14" y="402">说明：</text>
+    <text class="tiny" x="14" y="418">·</text>
+    <text class="tiny" x="22" y="418">
+      <tspan font-style="italic">F</tspan><tspan dy="3" font-size="9px">0</tspan><tspan dy="-3"> 控腿长，</tspan>
+      <tspan font-style="italic">T</tspan><tspan dy="3" font-size="9px">p</tspan><tspan dy="-3"> 控车身倾角 </tspan>
+      <tspan font-style="italic">θ</tspan>
+    </text>
+  </g>
+
+  <!-- 底部说明 -->
+  <text class="tiny mid" x="460" y="540">注：(F₀, T_p) 由上层平衡控制器给出，经 VMC 雅可比映射为关节力矩 (τ₁, τ₄)，下层伺服环执行。</text>
+</svg>

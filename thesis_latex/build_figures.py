@@ -22,6 +22,7 @@ DEST_DIR.mkdir(exist_ok=True)
 SIZES = {
     "fig1_system_framework": (920, 760),
     "fig2_robot_structure":  (920, 560),
+    "fig3_five_bar_kinematics": (920, 560),
 }
 
 
