@@ -23,6 +23,10 @@ SIZES = {
     "fig1_system_framework": (920, 760),
     "fig2_robot_structure":  (920, 560),
     "fig3_five_bar_kinematics": (920, 560),
+    "fig4_sim_platform":        (920, 600),
+    "fig5_ctrl_interface":      (920, 780),
+    "fig7_pid_cascade":         (920, 720),
+    "fig9_mpc_pgd_flow":        (920, 880),
 }
 
 

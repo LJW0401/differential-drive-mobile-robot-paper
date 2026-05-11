@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  图编号：图 9
+  图题：  MPC condensed-QP + PGD 求解流程图
+  论文章节：4.3.3 MPC 控制器实现
+  关键依赖：与 five_link_ctrl_simulation/MPCController.py 一致
+    1) 按 L₀ 在打表中线性插值得 (A_d, B_d, P)
+    2) 构造 condensed-form QP：min ½UᵀHU + gᵀU  s.t. u_min ≤ u_k ≤ u_max
+    3) 先尝试无约束闭式解 U* = -H⁻¹g；若可行则跳过 PGD
+    4) 否则在 U* / warm-start 之间取代价较低者为初值，PGD 迭代最多 30 次
+    5) 输出 u_0；剩余序列左移一位作为下一周期 warm-start
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 920 880" width="920" height="880"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC','SimSun','Times New Roman',serif">
+  <style>
+    .bg     { fill:#ffffff; }
+    .blk    { fill:#fafafa; stroke:#000; stroke-width:1.4; }
+    .blk2   { fill:#f0f0f0; stroke:#000; stroke-width:1.4; }
+    .io     { fill:#ffffff; stroke:#000; stroke-width:1.4; }
+    .dia    { fill:#ffffff; stroke:#000; stroke-width:1.6; }
+    .loop   { fill:none; stroke:#000; stroke-width:1.4; stroke-dasharray:6 5; }
+    .arr    { fill:none; stroke:#000; stroke-width:1.4; }
+    .ttl    { font-size:18px; font-weight:bold; fill:#000; }
+    .lbl    { font-size:14px; fill:#000; }
+    .sm     { font-size:12px; fill:#000; }
+    .tiny   { font-size:11px; fill:#444; }
+    .mono   { font-family:'DejaVu Sans Mono','Consolas','Menlo',monospace; font-size:12px; fill:#000; }
+    .mid    { text-anchor:middle; }
+    .right  { text-anchor:end; }
+    .italic { font-style:italic; }
+  </style>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="920" height="880"/>
+
+  <text class="ttl mid" x="460" y="34">MPC：condensed-QP + 投影梯度下降（PGD）求解流程</text>
+  <text class="tiny mid" x="460" y="54">每个控制周期一次性求解一个带盒约束的 QP；闭式可行则跳过迭代，否则在 warm-start 上做最多 30 次 PGD</text>
+
+  <!-- ========================= 输入 ========================= -->
+  <rect class="io" x="220" y="80" width="280" height="56" rx="28"/>
+  <text class="lbl mid" x="360" y="104" font-weight="bold">输入</text>
+  <text class="sm mid" x="360" y="124">当前状态 x₀ · 腿长 L₀ · 上周期解 U_prev</text>
+  <line class="arr" x1="360" y1="136" x2="360" y2="162" marker-end="url(#arr)"/>
+
+  <!-- ========================= A. 模型插值 ========================= -->
+  <rect class="blk" x="220" y="162" width="280" height="64" rx="6"/>
+  <text class="lbl mid" x="360" y="184" font-weight="bold">A. 模型插值</text>
+  <text class="sm mid" x="360" y="204">查 mpc_config.json：</text>
+  <text class="mono mid" x="360" y="220">(A_d, B_d, P) ← 线性插值(L₀)</text>
+  <line class="arr" x1="360" y1="226" x2="360" y2="252" marker-end="url(#arr)"/>
+
+  <!-- ========================= B. 构造 condensed-QP ========================= -->
+  <rect class="blk" x="220" y="252" width="280" height="96" rx="6"/>
+  <text class="lbl mid" x="360" y="274" font-weight="bold">B. 构造 condensed-QP</text>
+  <text class="mono mid" x="360" y="294">H = 2 (Sᵤᵀ Q_N Sᵤ + R_N)</text>
+  <text class="mono mid" x="360" y="312">g = 2 Sᵤᵀ Q_N Sₓ x₀</text>
+  <text class="tiny mid" x="360" y="330">Q_N = blkdiag(Q,…,Q,P)   R_N = blkdiag(R,…,R)</text>
+  <text class="tiny mid" x="360" y="346">min ½ Uᵀ H U + gᵀ U   s.t. u_min ≤ uₖ ≤ u_max</text>
+  <line class="arr" x1="360" y1="348" x2="360" y2="368" marker-end="url(#arr)"/>
+
+  <!-- ========================= C. 闭式解 ========================= -->
+  <rect class="blk" x="220" y="368" width="280" height="60" rx="6"/>
+  <text class="lbl mid" x="360" y="390" font-weight="bold">C. 闭式解（无约束）</text>
+  <text class="mono mid" x="360" y="412">U* = − H⁻¹ g</text>
+  <line class="arr" x1="360" y1="428" x2="360" y2="458" marker-end="url(#arr)"/>
+
+  <!-- ========================= D. 决策菱形 ========================= -->
+  <polygon class="dia" points="360,458 580,508 360,558 140,508"/>
+  <text class="lbl mid" x="360" y="500" font-weight="bold">D. 是否可行？</text>
+  <text class="sm mid" x="360" y="520">U* ∈ [u_min, u_max] ?</text>
+
+  <!-- yes 分支：向右 -->
+  <line class="arr" x1="580" y1="508" x2="650" y2="508" marker-end="url(#arr)"/>
+  <text class="sm" x="588" y="500" font-weight="bold">yes</text>
+
+  <!-- no 分支：向下 -->
+  <line class="arr" x1="360" y1="558" x2="360" y2="600" marker-end="url(#arr)"/>
+  <text class="sm" x="368" y="582" font-weight="bold">no</text>
+
+  <!-- ========================= Y. 跳过迭代 ========================= -->
+  <rect class="blk2" x="650" y="480" width="220" height="58" rx="6"/>
+  <text class="lbl mid" x="760" y="502" font-weight="bold">Y. 直接采用 U*</text>
+  <text class="tiny mid" x="760" y="522">闭式解可行，跳过 PGD</text>
+
+  <!-- ========================= E. warm-start 选择 ========================= -->
+  <rect class="blk" x="220" y="600" width="280" height="64" rx="6"/>
+  <text class="lbl mid" x="360" y="622" font-weight="bold">E. warm-start 选择</text>
+  <text class="tiny mid" x="360" y="642">U_init = argmin { J(U_prev_shift), J(U*) }</text>
+  <text class="tiny mid" x="360" y="658">取两候选中代价较低者作 PGD 初值</text>
+  <line class="arr" x1="360" y1="664" x2="360" y2="690" marker-end="url(#arr)"/>
+
+  <!-- ========================= F. PGD 主循环 ========================= -->
+  <rect class="blk" x="220" y="690" width="280" height="120" rx="6"/>
+  <text class="lbl mid" x="360" y="712" font-weight="bold">F. PGD 主循环（最多 30 次）</text>
+  <text class="mono mid" x="360" y="734">for k = 0 .. 29:</text>
+  <text class="mono mid" x="360" y="750">  G_k = H Uₖ + g     // 梯度</text>
+  <text class="mono mid" x="360" y="766">  Uₖ₊₁ = Proj( Uₖ − α G_k )</text>
+  <text class="tiny mid" x="360" y="786">α = 1 / λ_max(H)</text>
+  <text class="tiny mid" x="360" y="802">Proj = 逐元素裁剪到 [u_min, u_max]</text>
+
+  <!-- F → 输出汇合：先向下 -->
+  <line class="arr" x1="360" y1="810" x2="360" y2="830"/>
+  <!-- Y → 输出汇合：从 Y 右下角下来再左拐 -->
+  <line class="arr" x1="760" y1="538" x2="760" y2="830"/>
+  <line class="arr" x1="760" y1="830" x2="360" y2="830"/>
+
+  <!-- ========================= G. 输出 ========================= -->
+  <rect class="io" x="160" y="830" width="400" height="40" rx="20"/>
+  <text class="sm mid" x="360" y="855" font-weight="bold">G. 取 u₀ = U[0] 送执行器；U[1:] 左移一位 → 下周期 warm-start</text>
+
+  <!-- ========================= 右侧说明面板 ========================= -->
+  <g transform="translate(620,80)">
+    <rect class="blk2" x="0" y="0" width="280" height="380" rx="6"/>
+    <text class="lbl mid" x="140" y="22" font-weight="bold">关键参数与备注</text>
+
+    <text class="sm" x="14" y="50" font-weight="bold">预测时域</text>
+    <text class="sm mono" x="14" y="68">N = 15</text>
+    <text class="tiny" x="14" y="84">对应离散时间步 Δt = 20 ms</text>
+
+    <text class="sm" x="14" y="110" font-weight="bold">权重</text>
+    <text class="mono" x="14" y="128" font-size="11px">Q = diag(50, 1, 350, 100, 5000, 1)</text>
+    <text class="mono" x="14" y="144" font-size="11px">R = diag(100, 1)</text>
+
+    <text class="sm" x="14" y="172" font-weight="bold">输入盒约束</text>
+    <text class="mono" x="14" y="190" font-size="11px">u_min = (−4, −10)</text>
+    <text class="mono" x="14" y="206" font-size="11px">u_max = (+4, +10)   单位 N·m</text>
+
+    <text class="sm" x="14" y="234" font-weight="bold">终端代价</text>
+    <text class="tiny" x="14" y="252">P 来自 scipy.linalg.</text>
+    <text class="mono" x="14" y="266" font-size="11px">solve_discrete_are(A_d, B_d, Q, R)</text>
+
+    <text class="sm" x="14" y="294" font-weight="bold">PGD 步长</text>
+    <text class="mono" x="14" y="312" font-size="11px">α = 1 / λ_max(H)</text>
+    <text class="tiny" x="14" y="328">保证 PGD 收敛的最大步长上界</text>
+
+    <text class="sm" x="14" y="354" font-weight="bold">为何不用 OSQP</text>
+    <text class="tiny" x="14" y="370">自实现 PGD 无外部依赖，便于嵌入式部署</text>
+  </g>
+
+  <!-- 底部注释 -->
+  <text class="tiny mid" x="460" y="868">注：左右腿各跑一份 MPC，各自维护 warm-start；首步等效反馈在未饱和时与 LQR 一致（见图 10）。</text>
+</svg>

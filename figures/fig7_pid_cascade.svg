@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  图编号：图 7
+  图题：  PID 四级联控制结构图
+  论文章节：4.3.1 PID 控制器实现
+  关键依赖：与 five_link_ctrl_simulation/PIDController.py 一致
+    级联 1：位置外环 PID → pitch 内环 PID → 轮力矩 T          （平衡 + 位移）
+    级联 2：yaw PID → 左右轮差分 ΔT                            （yaw 跟踪）
+    级联 3：腿长 L₀ᵈ → VMC 逆运动学 → 关节内环 PID → τ₁, τ₄    （腿长 + 关节）
+    级联 4：腿长 PID + 重力前馈 → F₀（与图 5 共享，未在此图重复绘制）
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 920 720" width="920" height="720"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC','SimSun','Times New Roman',serif">
+  <style>
+    .bg     { fill:#ffffff; }
+    .blk    { fill:#fafafa; stroke:#000; stroke-width:1.4; }
+    .blk2   { fill:#f0f0f0; stroke:#000; stroke-width:1.4; }
+    .sum    { fill:#ffffff; stroke:#000; stroke-width:1.4; }
+    .arr    { fill:none; stroke:#000; stroke-width:1.4; }
+    .fb     { fill:none; stroke:#444; stroke-width:1.2; stroke-dasharray:5 4; }
+    .ttl    { font-size:18px; font-weight:bold; fill:#000; }
+    .lbl    { font-size:14px; fill:#000; }
+    .sm     { font-size:12px; fill:#000; }
+    .tiny   { font-size:11px; fill:#444; }
+    .mid    { text-anchor:middle; }
+    .right  { text-anchor:end; }
+    .italic { font-style:italic; }
+  </style>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+    <marker id="arrfb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="920" height="720"/>
+
+  <text class="ttl mid" x="460" y="34">PID 四级联控制结构图</text>
+  <text class="tiny mid" x="460" y="54">位置外环 → pitch 内环 → 轮力矩；yaw PID 差分叠加；VMC 逆 → 关节内环；被控对象状态由统一估计器闭环反馈</text>
+
+  <!-- =============================================================
+       Lane 1 ：平衡级联（位置外环 + pitch 内环）  y_center = 130
+       ============================================================= -->
+  <text class="sm" x="22" y="134" font-style="italic">x</text><text class="tiny" x="32" y="128">d</text>
+  <line class="arr" x1="50" y1="130" x2="80" y2="130" marker-end="url(#arr)"/>
+
+  <!-- summing junction ⊖1 -->
+  <circle class="sum" cx="92" cy="130" r="12"/>
+  <text class="sm mid" x="92" y="125">+</text>
+  <text class="sm" x="106" y="148">−</text>
+
+  <line class="arr" x1="104" y1="130" x2="140" y2="130" marker-end="url(#arr)"/>
+  <text class="tiny" x="112" y="124">e</text><text class="tiny" x="120" y="128">x</text>
+
+  <!-- 位置外环 PID -->
+  <rect class="blk" x="140" y="100" width="140" height="60" rx="6"/>
+  <text class="lbl mid" x="210" y="126" font-weight="bold">位置外环 PID</text>
+  <text class="tiny mid" x="210" y="146">→ pitch 参考 φ*</text>
+
+  <line class="arr" x1="280" y1="130" x2="312" y2="130" marker-end="url(#arr)"/>
+
+  <!-- sat -->
+  <rect class="blk" x="312" y="106" width="56" height="48" rx="6"/>
+  <text class="sm mid" x="340" y="128">sat(·)</text>
+  <text class="tiny mid" x="340" y="144">饱和限幅</text>
+
+  <line class="arr" x1="368" y1="130" x2="402" y2="130" marker-end="url(#arr)"/>
+  <text class="tiny mid" x="385" y="124">φ*</text>
+
+  <!-- summing junction ⊖2 -->
+  <circle class="sum" cx="414" cy="130" r="12"/>
+  <text class="sm mid" x="414" y="125">+</text>
+  <text class="sm" x="428" y="148">−</text>
+
+  <line class="arr" x1="426" y1="130" x2="462" y2="130" marker-end="url(#arr)"/>
+  <text class="tiny" x="436" y="124">e</text><text class="tiny italic" x="444" y="128">φ</text>
+
+  <!-- pitch 内环 PID -->
+  <rect class="blk" x="462" y="100" width="150" height="60" rx="6"/>
+  <text class="lbl mid" x="537" y="126" font-weight="bold">pitch 内环 PID</text>
+  <text class="tiny mid" x="537" y="146">→ 轮力矩 T</text>
+
+  <line class="arr" x1="612" y1="130" x2="700" y2="130" marker-end="url(#arr)"/>
+  <text class="sm mid" x="656" y="124" font-style="italic">T</text>
+  <text class="tiny mid" x="656" y="146">轮力矩</text>
+
+  <!-- =============================================================
+       Lane 2 ：yaw 差分          y_center = 250
+       ============================================================= -->
+  <text class="sm" x="22" y="254" font-style="italic">yaw</text><text class="tiny" x="48" y="248">d</text>
+  <line class="arr" x1="64" y1="250" x2="80" y2="250" marker-end="url(#arr)"/>
+
+  <circle class="sum" cx="92" cy="250" r="12"/>
+  <text class="sm mid" x="92" y="245">+</text>
+  <text class="sm" x="106" y="268">−</text>
+
+  <line class="arr" x1="104" y1="250" x2="140" y2="250" marker-end="url(#arr)"/>
+  <text class="tiny" x="110" y="244">e_yaw</text>
+
+  <rect class="blk" x="140" y="220" width="140" height="60" rx="6"/>
+  <text class="lbl mid" x="210" y="246" font-weight="bold">yaw PID</text>
+  <text class="tiny mid" x="210" y="266">→ 轮力矩差分 ΔT_yaw</text>
+
+  <line class="arr" x1="280" y1="250" x2="700" y2="250" marker-end="url(#arr)"/>
+  <text class="sm" x="450" y="244" font-style="italic">ΔT</text>
+  <text class="tiny" x="465" y="248">_yaw</text>
+  <text class="tiny mid" x="490" y="266">左右轮差分</text>
+
+  <!-- =============================================================
+       Lane 3 ：腿长 + 关节内环         y_center = 370
+       ============================================================= -->
+  <text class="sm" x="22" y="364">L₀</text><text class="tiny" x="36" y="358">d</text>
+  <text class="sm" x="22" y="384">φ₀</text><text class="tiny" x="38" y="378">d</text>
+
+  <line class="arr" x1="54" y1="370" x2="70" y2="370" marker-end="url(#arr)"/>
+
+  <rect class="blk" x="70" y="340" width="140" height="60" rx="6"/>
+  <text class="lbl mid" x="140" y="364" font-weight="bold">VMC 逆运动学</text>
+  <text class="tiny mid" x="140" y="382">(L₀ᵈ, φ₀ᵈ) ⟶ (φ₁ᵈ, φ₄ᵈ)</text>
+
+  <line class="arr" x1="210" y1="370" x2="262" y2="370" marker-end="url(#arr)"/>
+  <text class="tiny mid" x="236" y="364">φ₁ᵈ, φ₄ᵈ</text>
+
+  <circle class="sum" cx="274" cy="370" r="12"/>
+  <text class="sm mid" x="274" y="365">+</text>
+  <text class="sm" x="288" y="388">−</text>
+
+  <line class="arr" x1="286" y1="370" x2="322" y2="370" marker-end="url(#arr)"/>
+  <text class="tiny" x="294" y="364">e_φi</text>
+
+  <rect class="blk" x="322" y="340" width="160" height="60" rx="6"/>
+  <text class="lbl mid" x="402" y="366" font-weight="bold">关节内环 PID</text>
+  <text class="tiny mid" x="402" y="386">→ 关节力矩 τ₁, τ₄</text>
+
+  <line class="arr" x1="482" y1="370" x2="700" y2="370" marker-end="url(#arr)"/>
+  <text class="sm mid" x="582" y="364" font-style="italic">τ₁, τ₄</text>
+  <text class="tiny mid" x="582" y="386">关节力矩</text>
+
+  <!-- =============================================================
+       右侧：被控对象 + 状态估计器
+       ============================================================= -->
+  <rect class="blk2" x="700" y="90" width="180" height="320" rx="8"/>
+  <text class="lbl mid" x="790" y="116" font-weight="bold">被控对象</text>
+  <text class="tiny mid" x="790" y="134">五连杆轮腿机器人</text>
+  <text class="tiny mid" x="790" y="150">+ MuJoCo 物理仿真</text>
+
+  <!-- 内部子框：轮力矩合成 + 关节执行 -->
+  <rect class="sum" x="716" y="170" width="148" height="58" rx="5"/>
+  <text class="sm mid" x="790" y="190" font-weight="bold">轮力矩合成</text>
+  <text class="tiny mid" x="790" y="208">T_l = T + ΔT_yaw</text>
+  <text class="tiny mid" x="790" y="222">T_r = T − ΔT_yaw</text>
+
+  <rect class="sum" x="716" y="248" width="148" height="46" rx="5"/>
+  <text class="sm mid" x="790" y="270" font-weight="bold">关节执行</text>
+  <text class="tiny mid" x="790" y="286">τ₁, τ₄  →  motor</text>
+
+  <rect class="sum" x="716" y="314" width="148" height="76" rx="5"/>
+  <text class="sm mid" x="790" y="334" font-weight="bold">状态估计</text>
+  <text class="tiny mid" x="790" y="352">IMU + 编码器</text>
+  <text class="tiny mid" x="790" y="368">⟶ x, φ, yaw, φ₁, φ₄</text>
+  <text class="tiny mid" x="790" y="384">⟶ 反馈各级联</text>
+
+  <!-- =============================================================
+       反馈：状态估计 → 各 summing junction
+       4 条独立路径，水平段分别走在「车道之间」的空白带，避免纵向叠加
+       ============================================================= -->
+  <!-- 反馈：WeasyPrint 的 polyline marker-end 取首段方向，会导致 corner 处箭头朝左；
+       拆成水平段（无箭头）+ 上行垂直段（marker-end）两段独立 line -->
+  <!-- (a) φ feedback：(700,180) →(414,180) ↑(414,142) -->
+  <line class="fb" x1="700" y1="180" x2="414" y2="180"/>
+  <line class="fb" x1="414" y1="180" x2="414" y2="142" marker-end="url(#arrfb)"/>
+  <text class="tiny" x="422" y="176" fill="#444" font-style="italic">φ</text>
+
+  <!-- (b) x feedback：(700,210) →(92,210) ↑(92,142) -->
+  <line class="fb" x1="700" y1="210" x2="92"  y2="210"/>
+  <line class="fb" x1="92"  y1="210" x2="92"  y2="142" marker-end="url(#arrfb)"/>
+  <text class="tiny" x="100" y="206" fill="#444" font-style="italic">x</text>
+
+  <!-- (c) yaw feedback：(700,300) →(92,300) ↑(92,262) -->
+  <line class="fb" x1="700" y1="300" x2="92"  y2="300"/>
+  <line class="fb" x1="92"  y1="300" x2="92"  y2="262" marker-end="url(#arrfb)"/>
+  <text class="tiny" x="100" y="296" fill="#444">yaw</text>
+
+  <!-- (d) joint feedback：(700,420) →(274,420) ↑(274,382) -->
+  <line class="fb" x1="700" y1="420" x2="274" y2="420"/>
+  <line class="fb" x1="274" y1="420" x2="274" y2="382" marker-end="url(#arrfb)"/>
+  <text class="tiny" x="282" y="416" fill="#444">φ₁, φ₄</text>
+
+  <text class="tiny" x="58" y="446" fill="#444">虚线为状态反馈通道（被控对象 → 求和点）</text>
+
+  <!-- =============================================================
+       底部：四级联说明
+       ============================================================= -->
+  <g transform="translate(60,520)">
+    <rect class="blk" x="0" y="0" width="800" height="170" rx="6"/>
+    <text class="lbl" x="14" y="22" font-weight="bold">四级联结构说明</text>
+
+    <text class="sm" x="14" y="48">① 位置外环 PID：</text>
+    <text class="tiny" x="130" y="48">由位移误差生成 pitch 参考 φ*，再经饱和块限幅后馈入 pitch 内环，避免大角度参考激发非线性。</text>
+
+    <text class="sm" x="14" y="74">② pitch 内环 PID：</text>
+    <text class="tiny" x="130" y="74">直接由车身倾角误差 e_φ 生成轮力矩 T，是平衡控制的核心；与 LQR、MPC 形成对照。</text>
+
+    <text class="sm" x="14" y="100">③ yaw PID：</text>
+    <text class="tiny" x="130" y="100">独立通道，仅影响左右轮力矩差分 ΔT_yaw，最终 T_l = T + ΔT_yaw，T_r = T − ΔT_yaw。</text>
+
+    <text class="sm" x="14" y="126">④ 关节内环 PID：</text>
+    <text class="tiny" x="130" y="126">由 L₀ᵈ、φ₀ᵈ 经 VMC 逆运动学得到关节目标 φ₁ᵈ, φ₄ᵈ，再由经典 PID 计算关节力矩 τ₁, τ₄。</text>
+
+    <text class="tiny" x="14" y="152" fill="#444">注：本图未画腿长 PID + 重力前馈通道（详见图 5），其在 PID/LQR/MPC 三类控制器中共用。</text>
+  </g>
+</svg>

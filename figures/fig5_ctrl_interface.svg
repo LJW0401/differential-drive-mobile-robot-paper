@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  图编号：图 5
+  图题：  三类控制器统一接口框图
+  论文章节：3.4 控制算法模块设计
+  关键依赖：与 five_link_ctrl_simulation/{PIDController,LQRController,MPCController}.py 一致
+            统一接口 compute(imu, motors) → (joint_torque, wheel_torque)
+            差异仅在生成 (T, T_p) 的核心平衡块；前后端共享状态估计、腿长 PID、yaw PID 与 VMC 雅可比
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 920 780" width="920" height="780"
+     font-family="'Noto Serif CJK SC','Source Han Serif SC','Songti SC','SimSun','Times New Roman',serif">
+  <style>
+    .bg     { fill:#ffffff; }
+    .blk    { fill:#fafafa; stroke:#000; stroke-width:1.4; }
+    .blk2   { fill:#f0f0f0; stroke:#000; stroke-width:1.4; }
+    .core   { fill:#ffffff; stroke:#000; stroke-width:1.6; }
+    .arr    { fill:none; stroke:#000; stroke-width:1.4; }
+    .arr2   { fill:none; stroke:#000; stroke-width:1.4; stroke-dasharray:5 4; }
+    .panel  { fill:none; stroke:#888; stroke-width:0.9; stroke-dasharray:4 4; }
+    .ttl    { font-size:18px; font-weight:bold; fill:#000; }
+    .lbl    { font-size:14px; fill:#000; }
+    .sm     { font-size:12px; fill:#000; }
+    .tiny   { font-size:11px; fill:#444; }
+    .mono   { font-family:'DejaVu Sans Mono','Consolas','Menlo',monospace; font-size:12px; fill:#000; }
+    .mid    { text-anchor:middle; }
+    .right  { text-anchor:end; }
+  </style>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000"/>
+    </marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="920" height="780"/>
+
+  <!-- 标题 -->
+  <text class="ttl mid" x="460" y="34">三类控制器统一接口框图</text>
+  <text class="tiny mid" x="460" y="54">所有控制器共享同一 compute(imu, motors) → (joint_torque, wheel_torque) 接口，差异仅集中在虚框「平衡量生成」内</text>
+
+  <!-- ============================ 顶部：输入接口 ============================ -->
+  <!-- 高度坐标：y=80–132 -->
+  <g transform="translate(140,80)">
+    <rect class="blk" x="0"   y="0" width="290" height="52" rx="6"/>
+    <text class="lbl" x="14" y="20" font-weight="bold">imu</text>
+    <text class="sm" x="14" y="38">欧拉角 (roll, pitch, yaw) · 角速度 ω</text>
+
+    <rect class="blk" x="350" y="0" width="290" height="52" rx="6"/>
+    <text class="lbl" x="364" y="20" font-weight="bold">motors</text>
+    <text class="sm" x="364" y="38">4 关节编码器 · 2 轮编码器</text>
+  </g>
+
+  <!-- 输入 → 状态估计 (y=132 → y=210, 长度 78) -->
+  <line class="arr" x1="285" y1="132" x2="285" y2="210" marker-end="url(#arr)"/>
+  <line class="arr" x1="635" y1="132" x2="635" y2="210" marker-end="url(#arr)"/>
+  <text class="tiny" x="293" y="175">imu</text>
+  <text class="tiny" x="643" y="175">motors</text>
+
+  <!-- ============================ 共享前端：状态估计器 (y=210–280) ============================ -->
+  <g transform="translate(140,210)">
+    <rect class="blk2" x="0" y="0" width="640" height="70" rx="6"/>
+    <text class="lbl mid" x="320" y="26" font-weight="bold">状态估计器（VMC 正运动学 + 里程估计）</text>
+    <text class="sm mid" x="320" y="50">关节角 (φ₁, φ₄) ⟶ 虚拟腿 (L₀, φ₀)；IMU + 编码器 ⟶ 六维状态向量</text>
+  </g>
+
+  <!-- 状态向量出口 (y=280 → y=360, 长度 80) -->
+  <line class="arr" x1="460" y1="280" x2="460" y2="360" marker-end="url(#arr)"/>
+  <text class="sm" x="468" y="318" font-style="italic">x</text>
+  <text class="tiny" x="478" y="322">= (θ, θ<tspan dx="-4" dy="-5" font-size="120%">·</tspan><tspan dy="5">, x, ẋ, φ, φ</tspan><tspan dx="-4" dy="-5" font-size="120%">·</tspan><tspan dy="5">)ᵀ</tspan></text>
+  <text class="tiny" x="478" y="340">六维状态 → 三分支</text>
+
+  <!-- ============================ 中部：平衡量生成（差异核心，虚框） y=360–500 ============================ -->
+  <g transform="translate(70,360)">
+    <rect class="panel" x="0" y="0" width="780" height="140" rx="8"/>
+    <text class="lbl" x="14" y="22" font-weight="bold">平衡量生成（三类控制器仅此处不同）</text>
+
+    <!-- PID -->
+    <rect class="core" x="40"  y="44" width="200" height="80" rx="6"/>
+    <text class="lbl mid" x="140" y="70">PID</text>
+    <text class="tiny mid" x="140" y="90">位置外环 → pitch 内环</text>
+    <text class="tiny mid" x="140" y="106">固定增益 · 4 级联</text>
+
+    <!-- LQR -->
+    <rect class="core" x="290" y="44" width="200" height="80" rx="6"/>
+    <text class="lbl mid" x="390" y="70">LQR</text>
+    <text class="tiny mid" x="390" y="90">u = −K(L₀) · x</text>
+    <text class="tiny mid" x="390" y="106">K 矩阵按 L₀ 离线打表 + 插值</text>
+
+    <!-- MPC -->
+    <rect class="core" x="540" y="44" width="200" height="80" rx="6"/>
+    <text class="lbl mid" x="640" y="70">MPC</text>
+    <text class="tiny mid" x="640" y="90">condensed QP · N = 15</text>
+    <text class="tiny mid" x="640" y="106">PGD + warm start · 盒约束</text>
+  </g>
+
+  <!-- 三分支：从 x（在 y=360 处）一路分到 PID/LQR/MPC （x 中线 460；目标 x: 210/460/710，箭头到 y=404） -->
+  <path class="arr" d="M 460 360 L 210 360 L 210 404" marker-end="url(#arr)"/>
+  <line class="arr" x1="460" y1="360" x2="460" y2="404" marker-end="url(#arr)"/>
+  <path class="arr" d="M 460 360 L 710 360 L 710 404" marker-end="url(#arr)"/>
+
+  <!-- 三分支输出 (T, T_p) → 共享后端 y=484 -> 合并到 460,560 -> 后端 (y=580) -->
+  <line class="arr" x1="210" y1="484" x2="210" y2="540"/>
+  <line class="arr" x1="460" y1="484" x2="460" y2="540"/>
+  <line class="arr" x1="710" y1="484" x2="710" y2="540"/>
+  <line class="arr" x1="210" y1="540" x2="710" y2="540"/>
+  <line class="arr" x1="460" y1="540" x2="460" y2="582" marker-end="url(#arr)"/>
+  <text class="sm" x="468" y="528" font-style="italic">(T, T</text>
+  <text class="sm" x="498" y="532" font-style="italic">p</text>
+  <text class="sm" x="508" y="528" font-style="italic">)</text>
+  <text class="tiny" x="468" y="566">N·m，仅二维平衡量</text>
+
+  <!-- ============================ 共享后端：辅助通道 + VMC 映射 y=582–700 ============================ -->
+  <g transform="translate(70,582)">
+    <rect class="blk2" x="0" y="0" width="780" height="118" rx="6"/>
+    <text class="lbl" x="14" y="20" font-weight="bold">共享辅助通道 + VMC 雅可比映射</text>
+
+    <!-- 腿长 PID -->
+    <rect class="blk" x="14"  y="34" width="200" height="70" rx="5"/>
+    <text class="sm mid" x="114" y="54" font-weight="bold">腿长 PID + 重力前馈</text>
+    <text class="tiny mid" x="114" y="74">L₀ᵈ → F₀（控制腿长）</text>
+    <text class="tiny mid" x="114" y="92">F_ff = Mg·cos(θ)/2</text>
+
+    <!-- yaw PID -->
+    <rect class="blk" x="230" y="34" width="200" height="70" rx="5"/>
+    <text class="sm mid" x="330" y="54" font-weight="bold">yaw PID（左右轮差分）</text>
+    <text class="tiny mid" x="330" y="74">yawᵈ → ΔT 叠加到 T_l, T_r</text>
+    <text class="tiny mid" x="330" y="92">不参与平衡量生成</text>
+
+    <!-- VMC 映射 -->
+    <rect class="blk" x="446" y="34" width="320" height="70" rx="5"/>
+    <text class="sm mid" x="606" y="54" font-weight="bold">VMC 雅可比映射 J(φ₁, φ₄)</text>
+    <text class="tiny mid" x="606" y="74">[F₀, T_p]ᵀ  ⟶  [τ₁, τ₄]ᵀ = Jᵀ · [F₀, T_p]ᵀ</text>
+    <text class="tiny mid" x="606" y="92">左 / 右腿各跑一份，互不耦合</text>
+  </g>
+
+  <!-- 输出 y=730–766：
+       wheel_torque ← yaw PID（中间块 x=330，输出 T + ΔT_yaw），左边
+       joint_torque ← VMC 雅可比映射（右块 x=606，输出 τ₁, τ₄），右边
+       两根近似竖直箭头，不交叉 -->
+  <line class="arr" x1="330" y1="700" x2="285" y2="730" marker-end="url(#arr)"/>
+  <text class="tiny mid" x="245" y="720">T + ΔT_yaw</text>
+
+  <line class="arr" x1="606" y1="700" x2="635" y2="730" marker-end="url(#arr)"/>
+  <text class="tiny mid" x="685" y="720">τ₁, τ₄</text>
+
+  <g transform="translate(140,730)">
+    <rect class="blk" x="0"   y="0" width="290" height="36" rx="6"/>
+    <text class="sm mid" x="145" y="22" font-weight="bold">wheel_torque ∈ ℝ²</text>
+
+    <rect class="blk" x="350" y="0" width="290" height="36" rx="6"/>
+    <text class="sm mid" x="495" y="22" font-weight="bold">joint_torque ∈ ℝ⁴</text>
+  </g>
+</svg>
