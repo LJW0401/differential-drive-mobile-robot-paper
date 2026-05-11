@@ -40,7 +40,7 @@ META = dict(
     student_id = "1120220518",
     advisor_cn = "郑建波",
     advisor_ru = "Чжэн Цзяньбо",
-    advisor_title = "",      # 职称：MD 中未给出，留空
+    advisor_title = "讲师级研究员",
     year = "2026",
     month = "6",
 )
@@ -119,7 +119,9 @@ def fill_page1(page: fitz.Page) -> None:
     # 原表单在 姓名/院系/专业/学号/指导教师/职称 各行从标签右沿延伸到
     # 接近页右沿画了一条 vector 下划线，是表单的视觉骨架；apply 时
     # 用 graphics=0 保留这些 path，否则横线会一并被白底盖掉。
-    for y in (493, 527, 561, 595, 629, 663, 697):
+    # 注意：不包含 y=697 的提交日期行——它没有占位文字，只有 "年 月 日"
+    # 三个常驻汉字，redact 会把它们当作文本一起删掉。
+    for y in (493, 527, 561, 595, 629, 663):
         # 字段行：用 fill_white=False 让 annotation 不画白底，
         # 再配合 apply_redactions(keep_graphics=True) 保留下划线。
         redact_rect(page, 218, y, 555, y + 28, fill_white=False)
